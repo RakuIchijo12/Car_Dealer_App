@@ -3,8 +3,7 @@
     "frontend": {
       "routePrefix": "/",
       "framework": "angular",
-      "buildCommand": "npm run build",
-      "outputDirectory": "dist/dealeros/browser"
+      "buildCommand": "npm run build"
     }
   },
   "rewrites": [

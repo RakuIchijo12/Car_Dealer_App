@@ -52,3 +52,4 @@ api/node_modules/
 # Uploaded car photos (use cloud storage in production)
 uploads/
 api/uploads/
+.vercel
