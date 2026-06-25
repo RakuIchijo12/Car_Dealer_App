@@ -12,7 +12,8 @@ async function bootstrap() {
   app.useStaticAssets(join(__dirname, '..', 'uploads'), { prefix: '/uploads' });
   app.setGlobalPrefix('api');
 
-  await app.listen(3000);
-  console.log('Backend running on http://localhost:3000');
+  const port = process.env.PORT || 3001;
+  await app.listen(port);
+  console.log(`Backend running on http://localhost:${port}`);
 }
 bootstrap();
