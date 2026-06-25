@@ -1,0 +1,81 @@
+<div class="page">
+  <h1 class="page-title">Dashboard</h1>
+  <p class="page-sub">Welcome back — here's what's happening in your dealership.</p>
+
+  <!-- Stats grid -->
+  @if (stats()) {
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon blue">🚗</div>
+        <div class="stat-info">
+          <p class="stat-value">{{ stats()!.total }}</p>
+          <p class="stat-label">Total Cars</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon green">✅</div>
+        <div class="stat-info">
+          <p class="stat-value">{{ stats()!.available }}</p>
+          <p class="stat-label">Available</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon red">🔴</div>
+        <div class="stat-info">
+          <p class="stat-value">{{ stats()!.sold }}</p>
+          <p class="stat-label">Sold</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon yellow">⏳</div>
+        <div class="stat-info">
+          <p class="stat-value">{{ stats()!.reserved }}</p>
+          <p class="stat-label">Reserved</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon purple">🏭</div>
+        <div class="stat-info">
+          <p class="stat-value">{{ stats()!.totalMakes }}</p>
+          <p class="stat-label">Makes</p>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Recent activity -->
+  <div class="section">
+    <div class="section-header">
+      <h2 class="section-title">Recent Inventory</h2>
+      <a routerLink="/cars" class="see-all">See all →</a>
+    </div>
+    <div class="glass-card">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Car</th>
+            <th>Year</th>
+            <th>Price</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (car of recent(); track car.id) {
+            <tr>
+              <td>
+                <a [routerLink]="['/cars', car.id]" class="car-link">
+                  {{ car.make?.name }} {{ car.model }}
+                </a>
+              </td>
+              <td>{{ car.year }}</td>
+              <td>{{ formatPrice(+car.price) }}</td>
+              <td><span class="badge badge-{{ car.status }}">{{ car.status }}</span></td>
+            </tr>
+          } @empty {
+            <tr><td colspan="4" class="empty-row">No recent cars</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

@@ -1,18 +1,21 @@
 import { Component, OnInit } from '@angular/core';
-import { Cars } from 'src/app/interface/cars';
-import { CarsService } from 'src/app/services/cars.service';
+import { CommonModule } from '@angular/common';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Cars } from '../../interface/cars';
+import { CarsService } from '../../services/cars.service';
 import { Router } from '@angular/router';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-cars',
+  standalone: true,
+  imports: [CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './cars.component.html',
-  styleUrls: ['./cars.component.css']
+  styleUrl: './cars.component.css'
 })
 export class CarsComponent implements OnInit {
   cars: Cars[] = [];
-  filteredCars: Cars[] = []; // Holds filtered results
-  paginatedCars: Cars[] = []; // Holds paginated results
+  filteredCars: Cars[] = [];
+  paginatedCars: Cars[] = [];
   currentPage = 1;
   itemsPerPage = 5;
 
@@ -23,17 +26,17 @@ export class CarsComponent implements OnInit {
 
   filter = {
     make: '',
-    description: '', // Added Description filter
+    description: '',
     model: '',
     year: null,
     minPrice: null,
     maxPrice: null
   };
-  
+
   searchTerm: string = '';
 
   constructor(
-    private carsService: CarsService, 
+    private carsService: CarsService,
     private router: Router,
     private formBuilder: FormBuilder
   ) {
@@ -54,8 +57,8 @@ export class CarsComponent implements OnInit {
   loadAllCars() {
     this.carsService.loadCars().subscribe(cars => {
       this.cars = cars;
-      this.filteredCars = cars; // Initialize filtered cars
-      this.updatePaginatedCars(); // Update paginated cars initially
+      this.filteredCars = cars;
+      this.updatePaginatedCars();
     });
   }
 
@@ -76,8 +79,8 @@ export class CarsComponent implements OnInit {
         );
       });
     }
-    this.currentPage = 1; // Reset to the first page on search
-    this.updatePaginatedCars(); // Update paginated results
+    this.currentPage = 1;
+    this.updatePaginatedCars();
   }
 
   filterCars() {
@@ -91,15 +94,15 @@ export class CarsComponent implements OnInit {
         (this.filter.maxPrice !== null ? +car.price <= this.filter.maxPrice : true)
       );
     });
-    this.currentPage = 1; // Reset to first page on filter
-    this.updatePaginatedCars(); // Update paginated results
+    this.currentPage = 1;
+    this.updatePaginatedCars();
   }
 
   deleteCar(carId: number) {
     this.carsService.deleteCar(carId).subscribe({
       next: (response) => {
         this.cars = this.cars.filter(car => car.id !== carId);
-        this.filterCars(); // Re-apply filters after deletion
+        this.filterCars();
       },
       error: (error) => {
         alert('Failed to delete: ' + error.message);

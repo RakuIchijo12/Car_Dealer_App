@@ -1,0 +1,22 @@
+.page { max-width: 800px; }
+.page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+.page-title { font-size: 28px; font-weight: 800; color: #f9fafb; margin: 0; }
+.form-card { padding: 24px; margin-bottom: 24px; }
+.form-title { font-size: 18px; font-weight: 700; color: #f3f4f6; margin: 0 0 20px; }
+.field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+.field-label { font-size: 12px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; }
+.form-footer { display: flex; justify-content: flex-end; gap: 12px; }
+.cancel-btn { padding: 10px 20px; border-radius: 8px; background: none; color: #9ca3af; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; transition: all 0.15s; }
+.cancel-btn:hover { color: #f9fafb; }
+.error-banner { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #ef4444; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 12px; }
+.makes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 16px; }
+.make-card { padding: 24px 16px; text-align: center; transition: transform 0.2s; }
+.make-card:hover { transform: translateY(-2px); }
+.make-icon { font-size: 32px; margin-bottom: 8px; }
+.make-name { font-size: 16px; font-weight: 700; color: #f3f4f6; margin-bottom: 14px; }
+.make-actions { display: flex; justify-content: center; gap: 8px; }
+.action-btn { padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s; }
+.action-btn.edit   { background: rgba(245,158,11,0.15); color: #f59e0b; }
+.action-btn.delete { background: rgba(239,68,68,0.15);  color: #ef4444; }
+.action-btn:hover  { filter: brightness(1.2); }
+.empty { grid-column: 1/-1; color: #6b7280; text-align: center; padding: 40px; }

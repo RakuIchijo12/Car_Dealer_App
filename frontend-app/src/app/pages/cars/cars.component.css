@@ -1,0 +1,37 @@
+.page { max-width: 1200px; }
+.page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 24px; }
+.page-title { font-size: 28px; font-weight: 800; color: #f9fafb; margin: 0 0 4px; }
+.page-sub { color: #6b7280; font-size: 14px; margin: 0; }
+
+.filters-card { padding: 20px; margin-bottom: 24px; }
+.filters-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; margin-bottom: 12px; }
+.reset-btn { background: none; border: 1px solid rgba(255,255,255,0.1); color: #9ca3af; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; transition: all 0.15s; }
+.reset-btn:hover { border-color: rgba(255,255,255,0.2); color: #f9fafb; }
+
+.cars-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+
+.car-card { overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; }
+.car-card:hover { transform: translateY(-3px); box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
+
+.car-photo { position: relative; height: 180px; background: #1f2937; overflow: hidden; }
+.car-photo img { width: 100%; height: 100%; object-fit: cover; }
+.photo-placeholder { height: 100%; display: flex; align-items: center; justify-content: center; font-size: 48px; opacity: 0.3; }
+.card-badge { position: absolute; top: 10px; right: 10px; }
+
+.car-body { padding: 16px; }
+.car-name { font-size: 16px; font-weight: 700; color: #f3f4f6; margin: 0 0 4px; }
+.car-meta { font-size: 12px; color: #9ca3af; margin: 0 0 8px; }
+.car-price { font-size: 20px; font-weight: 800; color: #2563EB; margin: 0 0 4px; }
+.car-vin { font-size: 11px; color: #6b7280; margin: 0 0 12px; font-family: monospace; }
+
+.car-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+.action-btn { padding: 5px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; text-decoration: none; display: inline-block; transition: all 0.15s; }
+.action-btn.view  { background: rgba(37,99,235,0.15); color: #60a5fa; }
+.action-btn.edit  { background: rgba(245,158,11,0.15); color: #f59e0b; }
+.action-btn.sold  { background: rgba(16,185,129,0.15); color: #10b981; }
+.action-btn.delete{ background: rgba(239,68,68,0.15);  color: #ef4444; }
+.action-btn:hover { filter: brightness(1.2); }
+
+.loading { text-align: center; padding: 60px; color: #6b7280; font-size: 14px; }
+.empty-state { grid-column: 1/-1; text-align: center; padding: 60px 20px; color: #6b7280; }
+.empty-state p { font-size: 18px; margin-bottom: 16px; }

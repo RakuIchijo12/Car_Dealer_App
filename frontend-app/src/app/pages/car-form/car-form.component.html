@@ -1,0 +1,94 @@
+<div class="page">
+  <div class="page-header">
+    <a routerLink="/cars" class="back-link">← Back to Cars</a>
+    <h1 class="page-title">{{ isEdit() ? 'Edit Car' : 'Add New Car' }}</h1>
+  </div>
+
+  <div class="glass-card form-card">
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <div class="form-grid">
+        <div class="field">
+          <label class="field-label">Make</label>
+          <select formControlName="makeId" class="input-dark">
+            <option value="">Select Make</option>
+            @for (make of makes(); track make.id) {
+              <option [value]="make.id">{{ make.name }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="field">
+          <label class="field-label">Model *</label>
+          <input formControlName="model" class="input-dark" placeholder="e.g. Corolla" />
+          @if (form.get('model')?.touched && form.get('model')?.invalid) {
+            <span class="field-error">Model is required</span>
+          }
+        </div>
+
+        <div class="field">
+          <label class="field-label">Year *</label>
+          <input formControlName="year" type="number" class="input-dark" placeholder="e.g. 2022" />
+        </div>
+
+        <div class="field">
+          <label class="field-label">Color</label>
+          <input formControlName="color" class="input-dark" placeholder="e.g. Black" />
+        </div>
+
+        <div class="field">
+          <label class="field-label">Mileage (mi)</label>
+          <input formControlName="mileage" type="number" class="input-dark" placeholder="0" />
+        </div>
+
+        <div class="field">
+          <label class="field-label">Price (USD) *</label>
+          <input formControlName="price" type="number" class="input-dark" placeholder="25000" />
+        </div>
+
+        <div class="field">
+          <label class="field-label">Status</label>
+          <select formControlName="status" class="input-dark">
+            <option value="available">Available</option>
+            <option value="sold">Sold</option>
+            <option value="reserved">Reserved</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label class="field-label">VIN</label>
+          <input formControlName="vin" class="input-dark" placeholder="Optional" />
+        </div>
+      </div>
+
+      <div class="field full-width">
+        <label class="field-label">Description / Notes</label>
+        <textarea formControlName="description" class="input-dark" rows="3" placeholder="Any notes about this vehicle..."></textarea>
+      </div>
+
+      <!-- Photo upload -->
+      <div class="field full-width">
+        <label class="field-label">Photo</label>
+        <div class="photo-upload" (click)="fileInput.click()">
+          @if (previewUrl()) {
+            <img [src]="previewUrl()!" class="photo-preview" alt="Car photo" />
+          } @else {
+            <div class="upload-placeholder">
+              <span class="upload-icon">📷</span>
+              <p>Click to upload photo</p>
+            </div>
+          }
+        </div>
+        <input #fileInput type="file" accept="image/*" (change)="onFileChange($event)" style="display:none" />
+      </div>
+
+      @if (error()) { <div class="error-banner">{{ error() }}</div> }
+
+      <div class="form-footer">
+        <a routerLink="/cars" class="cancel-btn">Cancel</a>
+        <button type="submit" class="btn-primary" [disabled]="loading() || form.invalid">
+          @if (loading()) { Saving... } @else { {{ isEdit() ? 'Update Car' : 'Add Car' }} }
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

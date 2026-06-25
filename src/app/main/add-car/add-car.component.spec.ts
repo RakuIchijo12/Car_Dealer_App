@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { provideHttpClient } from '@angular/common/http';
+import { provideRouter } from '@angular/router';
 import { AddCarComponent } from './add-car.component';
 
 describe('AddCarComponent', () => {
@@ -8,7 +9,8 @@ describe('AddCarComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [AddCarComponent]
+      imports: [AddCarComponent],
+      providers: [provideHttpClient(), provideRouter([])]
     });
     fixture = TestBed.createComponent(AddCarComponent);
     component = fixture.componentInstance;

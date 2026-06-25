@@ -1,0 +1,76 @@
+<div class="login-page">
+  <!-- Background car silhouette -->
+  <div class="car-silhouette" aria-hidden="true">
+    <svg viewBox="0 0 800 300" xmlns="http://www.w3.org/2000/svg" fill="none">
+      <path d="M80 220 L80 180 C80 160 100 130 130 120 L200 100 L300 75 C330 68 380 65 420 65 L520 65 C560 65 610 68 640 80 L700 100 L730 120 C750 130 760 150 760 170 L760 220 Z" fill="#2563EB" opacity="0.05"/>
+      <ellipse cx="180" cy="222" rx="45" ry="45" fill="#2563EB" opacity="0.05"/>
+      <ellipse cx="640" cy="222" rx="45" ry="45" fill="#2563EB" opacity="0.05"/>
+      <path d="M220 120 L280 80 L480 80 L560 120 Z" fill="#2563EB" opacity="0.04"/>
+    </svg>
+  </div>
+
+  <!-- Radial spotlight -->
+  <div class="spotlight" aria-hidden="true"></div>
+
+  <!-- Login card -->
+  <div class="login-card">
+    <!-- Logo -->
+    <div class="logo-area">
+      <span class="logo-icon">🚗</span>
+      <h1 class="logo-text">DealerOS</h1>
+    </div>
+    <p class="tagline">Manage your fleet. Close every deal.</p>
+    <div class="divider"></div>
+
+    <!-- Form -->
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <!-- Email -->
+      <div class="field">
+        <label class="field-label">Email</label>
+        <input
+          type="email"
+          formControlName="email"
+          class="input-dark"
+          placeholder="admin@dealeros.com"
+          autocomplete="email"
+        />
+        @if (form.get('email')?.touched && form.get('email')?.invalid) {
+          <span class="field-error">Enter a valid email</span>
+        }
+      </div>
+
+      <!-- Password -->
+      <div class="field">
+        <label class="field-label">Password</label>
+        <div class="password-wrap">
+          <input
+            [type]="showPassword() ? 'text' : 'password'"
+            formControlName="password"
+            class="input-dark"
+            placeholder="••••••••"
+            autocomplete="current-password"
+          />
+          <button type="button" class="toggle-pw" (click)="showPassword.set(!showPassword())">
+            {{ showPassword() ? '🙈' : '👁️' }}
+          </button>
+        </div>
+        @if (form.get('password')?.touched && form.get('password')?.invalid) {
+          <span class="field-error">Password required</span>
+        }
+      </div>
+
+      <!-- Error -->
+      @if (error()) {
+        <div class="error-banner">{{ error() }}</div>
+      }
+
+      <!-- Submit -->
+      <button type="submit" class="btn-primary w-full mt-2" [disabled]="loading()">
+        @if (loading()) { <span class="spinner"></span> Signing in... }
+        @else { Sign In }
+      </button>
+
+      <a href="#" class="forgot-link">Forgot password?</a>
+    </form>
+  </div>
+</div>

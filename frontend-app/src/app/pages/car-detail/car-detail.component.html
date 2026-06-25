@@ -1,0 +1,64 @@
+<div class="page">
+  @if (car()) {
+    <div class="page-header">
+      <a routerLink="/cars" class="back-link">← Back to Cars</a>
+      <a [routerLink]="['/cars', car()!.id, 'edit']" class="btn-primary">Edit Car</a>
+    </div>
+
+    <div class="detail-layout">
+      <!-- Photo -->
+      <div class="photo-section glass-card">
+        @if (car()!.photo) {
+          <img [src]="photoUrl(car()!.photo!)" [alt]="car()!.model" class="car-photo" />
+        } @else {
+          <div class="photo-placeholder">🚗</div>
+        }
+      </div>
+
+      <!-- Info -->
+      <div class="info-section">
+        <div class="glass-card info-card">
+          <div class="title-row">
+            <h1 class="car-title">{{ car()!.make?.name }} {{ car()!.model }}</h1>
+            <span class="badge badge-{{ car()!.status }}">{{ car()!.status }}</span>
+          </div>
+          <p class="car-price">{{ formatPrice(+car()!.price) }}</p>
+
+          <div class="details-grid">
+            <div class="detail-item">
+              <span class="detail-label">Year</span>
+              <span class="detail-value">{{ car()!.year }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Color</span>
+              <span class="detail-value">{{ car()!.color || '—' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Mileage</span>
+              <span class="detail-value">{{ car()!.mileage | number }} mi</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Make</span>
+              <span class="detail-value">{{ car()!.make?.name || '—' }}</span>
+            </div>
+            @if (car()!.vin) {
+              <div class="detail-item full">
+                <span class="detail-label">VIN</span>
+                <span class="detail-value mono">{{ car()!.vin }}</span>
+              </div>
+            }
+          </div>
+
+          @if (car()!.description) {
+            <div class="description">
+              <h3 class="desc-title">Notes</h3>
+              <p class="desc-text">{{ car()!.description }}</p>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  } @else {
+    <div class="loading">Loading...</div>
+  }
+</div>

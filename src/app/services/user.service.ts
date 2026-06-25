@@ -1,9 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Route } from '@angular/router';
 import { User } from '../interface/user';
-import { Observable } from 'rxjs';
-import { throwError } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
 @Injectable({
@@ -12,14 +10,14 @@ import { catchError } from 'rxjs/operators';
 export class UserService {
   private apiUrl = '/api/user';
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
-  getUser(): Observable <User[]>{
+  getUser(): Observable<User[]> {
     const getUrl = `${this.apiUrl}/current-user`;
     return this.http.get<User[]>(getUrl);
   }
 
-  loginUser(user:User): Observable<any>{
+  loginUser(user: User): Observable<any> {
     const loginUrl = `${this.apiUrl}/login`;
     return this.http.post<any>(loginUrl, user);
   }
@@ -34,7 +32,7 @@ export class UserService {
     );
   }
 
-  loadUsers(): Observable<User[]>{
+  loadUsers(): Observable<User[]> {
     const loadUrl = `${this.apiUrl}`;
     return this.http.get<User[]>(loadUrl);
   }

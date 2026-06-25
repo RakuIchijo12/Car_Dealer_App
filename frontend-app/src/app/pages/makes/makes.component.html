@@ -1,0 +1,40 @@
+<div class="page">
+  <div class="page-header">
+    <h1 class="page-title">Makes</h1>
+    <button (click)="openNew()" class="btn-primary">+ Add Make</button>
+  </div>
+
+  @if (showForm()) {
+    <div class="glass-card form-card">
+      <h2 class="form-title">{{ editing() ? 'Edit Make' : 'New Make' }}</h2>
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <div class="field">
+          <label class="field-label">Name *</label>
+          <input formControlName="name" class="input-dark" placeholder="e.g. Toyota" />
+        </div>
+        @if (error()) { <div class="error-banner">{{ error() }}</div> }
+        <div class="form-footer">
+          <button type="button" (click)="cancel()" class="cancel-btn">Cancel</button>
+          <button type="submit" class="btn-primary" [disabled]="form.invalid">
+            {{ editing() ? 'Update' : 'Create' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  }
+
+  <div class="makes-grid">
+    @for (make of makes(); track make.id) {
+      <div class="make-card glass-card">
+        <div class="make-icon">🏭</div>
+        <div class="make-name">{{ make.name }}</div>
+        <div class="make-actions">
+          <button (click)="openEdit(make)" class="action-btn edit">Edit</button>
+          <button (click)="delete(make.id)" class="action-btn delete">Delete</button>
+        </div>
+      </div>
+    } @empty {
+      <div class="empty">No makes yet. Add one above.</div>
+    }
+  </div>
+</div>

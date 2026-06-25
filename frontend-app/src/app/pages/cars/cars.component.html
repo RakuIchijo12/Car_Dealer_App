@@ -1,0 +1,78 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Car Inventory</h1>
+      <p class="page-sub">{{ cars().length }} vehicles found</p>
+    </div>
+    <a routerLink="/cars/new" class="btn-primary">+ Add Car</a>
+  </div>
+
+  <!-- Filters -->
+  <div class="glass-card filters-card">
+    <div class="filters-grid">
+      <input [(ngModel)]="filters.search" (ngModelChange)="load()" placeholder="Search model or VIN..." class="input-dark" />
+      <select [(ngModel)]="filters.makeId" (ngModelChange)="load()" class="input-dark">
+        <option value="">All Makes</option>
+        @for (make of makes(); track make.id) {
+          <option [value]="make.id">{{ make.name }}</option>
+        }
+      </select>
+      <select [(ngModel)]="filters.status" (ngModelChange)="load()" class="input-dark">
+        <option value="">All Status</option>
+        <option value="available">Available</option>
+        <option value="sold">Sold</option>
+        <option value="reserved">Reserved</option>
+      </select>
+      <input [(ngModel)]="filters.yearMin" (ngModelChange)="load()" placeholder="Year from" type="number" class="input-dark" />
+      <input [(ngModel)]="filters.yearMax" (ngModelChange)="load()" placeholder="Year to" type="number" class="input-dark" />
+      <input [(ngModel)]="filters.priceMin" (ngModelChange)="load()" placeholder="Min price" type="number" class="input-dark" />
+      <input [(ngModel)]="filters.priceMax" (ngModelChange)="load()" placeholder="Max price" type="number" class="input-dark" />
+      <select [(ngModel)]="filters.sortBy" (ngModelChange)="load()" class="input-dark">
+        <option value="">Sort by</option>
+        <option value="year">Year</option>
+        <option value="price">Price</option>
+        <option value="mileage">Mileage</option>
+      </select>
+    </div>
+    <button (click)="resetFilters()" class="reset-btn">Reset Filters</button>
+  </div>
+
+  <!-- Cars grid -->
+  @if (loading()) {
+    <div class="loading">Loading...</div>
+  } @else {
+    <div class="cars-grid">
+      @for (car of cars(); track car.id) {
+        <div class="car-card glass-card">
+          <div class="car-photo">
+            @if (photoUrl(car.photo)) {
+              <img [src]="photoUrl(car.photo)!" [alt]="car.model" />
+            } @else {
+              <div class="photo-placeholder">🚗</div>
+            }
+            <span class="badge badge-{{ car.status }} card-badge">{{ car.status }}</span>
+          </div>
+          <div class="car-body">
+            <h3 class="car-name">{{ car.make?.name }} {{ car.model }}</h3>
+            <p class="car-meta">{{ car.year }} · {{ car.color }} · {{ car.mileage | number }} mi</p>
+            <p class="car-price">{{ formatPrice(+car.price) }}</p>
+            @if (car.vin) { <p class="car-vin">VIN: {{ car.vin }}</p> }
+            <div class="car-actions">
+              <a [routerLink]="['/cars', car.id]" class="action-btn view">View</a>
+              <a [routerLink]="['/cars', car.id, 'edit']" class="action-btn edit">Edit</a>
+              @if (car.status !== 'sold') {
+                <button (click)="markSold(car.id)" class="action-btn sold">Sold</button>
+              }
+              <button (click)="deleteCar(car.id)" class="action-btn delete">Delete</button>
+            </div>
+          </div>
+        </div>
+      } @empty {
+        <div class="empty-state">
+          <p>🚗 No cars found matching your filters.</p>
+          <button (click)="resetFilters()" class="btn-primary">Clear Filters</button>
+        </div>
+      }
+    </div>
+  }
+</div>

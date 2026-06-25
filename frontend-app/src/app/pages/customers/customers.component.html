@@ -1,0 +1,69 @@
+<div class="page">
+  <div class="page-header">
+    <h1 class="page-title">Customers</h1>
+    <button (click)="openNew()" class="btn-primary">+ Add Customer</button>
+  </div>
+
+  @if (showForm()) {
+    <div class="glass-card form-card">
+      <h2 class="form-title">{{ editing() ? 'Edit Customer' : 'New Customer' }}</h2>
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <div class="form-grid">
+          <div class="field">
+            <label class="field-label">Name *</label>
+            <input formControlName="name" class="input-dark" placeholder="Full name" />
+          </div>
+          <div class="field">
+            <label class="field-label">Email</label>
+            <input formControlName="email" type="email" class="input-dark" placeholder="email@example.com" />
+          </div>
+          <div class="field">
+            <label class="field-label">Phone</label>
+            <input formControlName="phone" class="input-dark" placeholder="+1 555 000 0000" />
+          </div>
+          <div class="field">
+            <label class="field-label">Car ID (linked)</label>
+            <input formControlName="carId" type="number" class="input-dark" placeholder="Car ID (optional)" />
+          </div>
+        </div>
+        <div class="field">
+          <label class="field-label">Notes</label>
+          <textarea formControlName="notes" class="input-dark" rows="2" placeholder="Any notes..."></textarea>
+        </div>
+        @if (error()) { <div class="error-banner">{{ error() }}</div> }
+        <div class="form-footer">
+          <button type="button" (click)="cancel()" class="cancel-btn">Cancel</button>
+          <button type="submit" class="btn-primary" [disabled]="form.invalid">{{ editing() ? 'Update' : 'Create' }}</button>
+        </div>
+      </form>
+    </div>
+  }
+
+  <div class="glass-card">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Name</th><th>Email</th><th>Phone</th><th>Car ID</th><th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (c of customers(); track c.id) {
+          <tr>
+            <td class="name-cell">{{ c.name }}</td>
+            <td>{{ c.email || '—' }}</td>
+            <td>{{ c.phone || '—' }}</td>
+            <td>{{ c.carId || '—' }}</td>
+            <td>
+              <div class="row-actions">
+                <button (click)="openEdit(c)" class="action-btn edit">Edit</button>
+                <button (click)="delete(c.id)" class="action-btn delete">Delete</button>
+              </div>
+            </td>
+          </tr>
+        } @empty {
+          <tr><td colspan="5" class="empty-row">No customers yet.</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

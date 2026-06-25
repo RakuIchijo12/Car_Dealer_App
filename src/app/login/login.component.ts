@@ -1,17 +1,20 @@
 import { Component } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { NgIf } from '@angular/common';
 import { UserService } from '../services/user.service';
 import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-login',
+  standalone: true,
+  imports: [ReactiveFormsModule, NgIf],
   templateUrl: './login.component.html',
-  styleUrls: ['./login.component.css']
+  styleUrl: './login.component.css'
 })
 export class LoginComponent {
   form: FormGroup;
   errorMessage: string | null = null;
-  
+
   constructor(
     private formBuilder: FormBuilder,
     private userService: UserService,
@@ -25,26 +28,26 @@ export class LoginComponent {
 
   submitCredentials() {
     if (this.form.invalid) {
-      this.errorMessage = "Both Email and Password are required.";
+      this.errorMessage = 'Both Email and Password are required.';
       return;
     }
     this.userService.loginUser(this.form.getRawValue()).subscribe({
       next: (response: any) => {
         if (response.success) {
           localStorage.setItem('token', response.accessToken);
-            this.router.navigateByUrl('/main');
+          this.router.navigateByUrl('/main');
         }
       },
       error: (error) => {
-        this.errorMessage = 'Invalid email or password.';  // Set error message instead of opening a dialog
+        this.errorMessage = 'Invalid email or password.';
         console.error(error);
       }
     });
   }
+
   clearError() {
     this.errorMessage = null;
   }
-
 
   navigateRegister() {
     this.router.navigateByUrl('/register');
