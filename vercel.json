@@ -1,6 +1,12 @@
 {
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist/dealeros/browser",
+  "experimentalServices": {
+    "frontend": {
+      "routePrefix": "/",
+      "framework": "angular",
+      "buildCommand": "npm run build",
+      "outputDirectory": "dist/dealeros/browser"
+    }
+  },
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ]
