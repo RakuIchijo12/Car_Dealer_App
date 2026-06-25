@@ -12,7 +12,7 @@
 .info-card { padding: 28px; }
 .title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
 .car-title { font-size: 24px; font-weight: 800; color: #f9fafb; margin: 0; }
-.car-price { font-size: 28px; font-weight: 800; color: #2563EB; margin: 0 0 24px; }
+.car-price { font-size: 28px; font-weight: 800; color: #DC2626; margin: 0 0 24px; }
 
 .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
 .detail-item { display: flex; flex-direction: column; gap: 3px; }

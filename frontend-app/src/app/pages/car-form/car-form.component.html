@@ -1,6 +1,6 @@
 <div class="page">
   <div class="page-header">
-    <a routerLink="/cars" class="back-link">← Back to Cars</a>
+    <a routerLink="/admin/cars" class="back-link">← Back to Cars</a>
     <h1 class="page-title">{{ isEdit() ? 'Edit Car' : 'Add New Car' }}</h1>
   </div>
 
@@ -84,7 +84,7 @@
       @if (error()) { <div class="error-banner">{{ error() }}</div> }
 
       <div class="form-footer">
-        <a routerLink="/cars" class="cancel-btn">Cancel</a>
+        <a routerLink="/admin/cars" class="cancel-btn">Cancel</a>
         <button type="submit" class="btn-primary" [disabled]="loading() || form.invalid">
           @if (loading()) { Saving... } @else { {{ isEdit() ? 'Update Car' : 'Add Car' }} }
         </button>

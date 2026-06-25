@@ -47,7 +47,7 @@
   <div class="section">
     <div class="section-header">
       <h2 class="section-title">Recent Inventory</h2>
-      <a routerLink="/cars" class="see-all">See all →</a>
+      <a routerLink="/admin/cars" class="see-all">See all →</a>
     </div>
     <div class="glass-card">
       <table class="data-table">
@@ -63,7 +63,7 @@
           @for (car of recent(); track car.id) {
             <tr>
               <td>
-                <a [routerLink]="['/cars', car.id]" class="car-link">
+                <a [routerLink]="['/admin/cars', car.id]" class="car-link">
                   {{ car.make?.name }} {{ car.model }}
                 </a>
               </td>

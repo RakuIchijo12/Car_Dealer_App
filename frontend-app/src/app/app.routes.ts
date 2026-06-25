@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
+import { LandingComponent } from './pages/landing/landing.component';
 import { LoginComponent } from './pages/login/login.component';
 import { ShellComponent } from './layout/shell.component';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
@@ -10,9 +11,10 @@ import { MakesComponent } from './pages/makes/makes.component';
 import { CustomersComponent } from './pages/customers/customers.component';
 
 export const routes: Routes = [
+  { path: '', component: LandingComponent },
   { path: 'login', component: LoginComponent },
   {
-    path: '',
+    path: 'admin',
     component: ShellComponent,
     canActivate: [authGuard],
     children: [
@@ -26,5 +28,5 @@ export const routes: Routes = [
       { path: 'customers', component: CustomersComponent },
     ],
   },
-  { path: '**', redirectTo: 'dashboard' },
+  { path: '**', redirectTo: '' },
 ];

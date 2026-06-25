@@ -14,10 +14,10 @@ interface NavItem { label: string; icon: string; route: string; }
 })
 export class ShellComponent {
   navItems: NavItem[] = [
-    { label: 'Dashboard', icon: '📊', route: '/dashboard' },
-    { label: 'Cars',      icon: '🚗', route: '/cars' },
-    { label: 'Makes',     icon: '🏭', route: '/makes' },
-    { label: 'Customers', icon: '👥', route: '/customers' },
+    { label: 'Dashboard', icon: '📊', route: '/admin/dashboard' },
+    { label: 'Cars',      icon: '🚗', route: '/admin/cars' },
+    { label: 'Makes',     icon: '🏭', route: '/admin/makes' },
+    { label: 'Customers', icon: '👥', route: '/admin/customers' },
   ];
 
   constructor(public auth: AuthService) {}

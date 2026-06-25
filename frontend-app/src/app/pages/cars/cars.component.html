@@ -4,7 +4,7 @@
       <h1 class="page-title">Car Inventory</h1>
       <p class="page-sub">{{ cars().length }} vehicles found</p>
     </div>
-    <a routerLink="/cars/new" class="btn-primary">+ Add Car</a>
+    <a routerLink="/admin/cars/new" class="btn-primary">+ Add Car</a>
   </div>
 
   <!-- Filters -->
@@ -54,12 +54,12 @@
           </div>
           <div class="car-body">
             <h3 class="car-name">{{ car.make?.name }} {{ car.model }}</h3>
-            <p class="car-meta">{{ car.year }} · {{ car.color }} · {{ car.mileage | number }} mi</p>
+            <p class="car-meta">{{ car.year }} · {{ car.color }} · {{ car.mileage | number }} km</p>
             <p class="car-price">{{ formatPrice(+car.price) }}</p>
             @if (car.vin) { <p class="car-vin">VIN: {{ car.vin }}</p> }
             <div class="car-actions">
-              <a [routerLink]="['/cars', car.id]" class="action-btn view">View</a>
-              <a [routerLink]="['/cars', car.id, 'edit']" class="action-btn edit">Edit</a>
+              <a [routerLink]="['/admin/cars', car.id]" class="action-btn view">View</a>
+              <a [routerLink]="['/admin/cars', car.id, 'edit']" class="action-btn edit">Edit</a>
               @if (car.status !== 'sold') {
                 <button (click)="markSold(car.id)" class="action-btn sold">Sold</button>
               }

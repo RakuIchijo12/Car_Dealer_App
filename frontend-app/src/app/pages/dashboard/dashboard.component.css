@@ -39,7 +39,7 @@
   margin-bottom: 14px;
 }
 .section-title { font-size: 18px; font-weight: 700; color: #f3f4f6; margin: 0; }
-.see-all { color: #2563EB; font-size: 13px; text-decoration: none; }
+.see-all { color: #DC2626; font-size: 13px; text-decoration: none; }
 .see-all:hover { text-decoration: underline; }
 
 .data-table { width: 100%; border-collapse: collapse; }
@@ -55,5 +55,5 @@
 }
 .data-table tr:last-child td { border-bottom: none; }
 .car-link { color: #f3f4f6; text-decoration: none; font-weight: 600; }
-.car-link:hover { color: #60a5fa; }
+.car-link:hover { color: #fca5a5; }
 .empty-row { color: #6b7280; text-align: center; padding: 24px; }

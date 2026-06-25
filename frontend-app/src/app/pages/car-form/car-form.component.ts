@@ -61,7 +61,7 @@ export class CarFormComponent implements OnInit {
           vin: car.vin || '',
           description: car.description || '',
         });
-        if (car.photo) this.previewUrl.set(`http://localhost:3000/uploads/${car.photo}`);
+        if (car.photo) this.previewUrl.set(`http://localhost:3001/uploads/${car.photo}`);
       });
     }
   }

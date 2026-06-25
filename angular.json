@@ -1,54 +1,53 @@
 {
   "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
   "version": 1,
+  "cli": {
+    "packageManager": "npm",
+    "analytics": false
+  },
   "newProjectRoot": "projects",
   "projects": {
-    "obsentry-project": {
+    "dealeros": {
       "projectType": "application",
       "schematics": {},
       "root": "",
-      "sourceRoot": "src",
+      "sourceRoot": "frontend-app/src",
       "prefix": "app",
       "architect": {
         "build": {
           "builder": "@angular/build:application",
           "options": {
-            "outputPath": "dist/obsentry-project",
-            "index": "src/index.html",
-            "browser": "src/main.ts",
-            "polyfills": [
-              "zone.js"
-            ],
+            "outputPath": "dist/dealeros",
+            "browser": "frontend-app/src/main.ts",
             "tsConfig": "tsconfig.app.json",
             "assets": [
               {
                 "glob": "**/*",
-                "input": "src/assets",
-                "output": "assets"
-              },
-              {
-                "glob": "favicon.ico",
-                "input": "src",
-                "output": ""
+                "input": "frontend-app/public"
               }
             ],
             "styles": [
-              "src/styles.css"
-            ],
-            "scripts": []
+              "frontend-app/src/styles.css"
+            ]
           },
           "configurations": {
             "production": {
+              "fileReplacements": [
+                {
+                  "replace": "frontend-app/src/environments/environment.ts",
+                  "with": "frontend-app/src/environments/environment.production.ts"
+                }
+              ],
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kb",
-                  "maximumError": "1mb"
+                  "maximumWarning": "1MB",
+                  "maximumError": "2MB"
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "2kb",
-                  "maximumError": "4kb"
+                  "maximumWarning": "8kB",
+                  "maximumError": "16kB"
                 }
               ],
               "outputHashing": "all"
@@ -63,15 +62,12 @@
         },
         "serve": {
           "builder": "@angular/build:dev-server",
-          "options": {
-            "proxyConfig": "src/proxy.conf.json"
-          },
           "configurations": {
             "production": {
-              "buildTarget": "obsentry-project:build:production"
+              "buildTarget": "dealeros:build:production"
             },
             "development": {
-              "buildTarget": "obsentry-project:build:development"
+              "buildTarget": "dealeros:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -79,39 +75,16 @@
         "extract-i18n": {
           "builder": "@angular/build:extract-i18n",
           "options": {
-            "buildTarget": "obsentry-project:build"
+            "buildTarget": "dealeros:build"
           }
         },
         "test": {
-          "builder": "@angular/build:karma",
+          "builder": "@angular/build:unit-test",
           "options": {
-            "polyfills": [
-              "zone.js",
-              "zone.js/testing"
-            ],
-            "tsConfig": "tsconfig.spec.json",
-            "assets": [
-              {
-                "glob": "**/*",
-                "input": "src/assets",
-                "output": "assets"
-              },
-              {
-                "glob": "favicon.ico",
-                "input": "src",
-                "output": ""
-              }
-            ],
-            "styles": [
-              "src/styles.css"
-            ],
-            "scripts": []
+            "watch": false
           }
         }
       }
     }
-  },
-  "cli": {
-    "analytics": "1350fbb1-eb56-4357-af02-bcf9ec9d9fdf"
   }
 }

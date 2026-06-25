@@ -47,10 +47,10 @@ export class CarsComponent implements OnInit {
   }
 
   formatPrice(p: number) {
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(p);
+    return '₱' + new Intl.NumberFormat('en-PH', { maximumFractionDigits: 0 }).format(p);
   }
 
   photoUrl(photo: string | undefined) {
-    return photo ? `http://localhost:3000/uploads/${photo}` : null;
+    return photo ? `http://localhost:3001/uploads/${photo}` : null;
   }
 }

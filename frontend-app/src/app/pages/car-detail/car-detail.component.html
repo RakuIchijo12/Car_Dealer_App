@@ -1,8 +1,8 @@
 <div class="page">
   @if (car()) {
     <div class="page-header">
-      <a routerLink="/cars" class="back-link">← Back to Cars</a>
-      <a [routerLink]="['/cars', car()!.id, 'edit']" class="btn-primary">Edit Car</a>
+      <a routerLink="/admin/cars" class="back-link">← Back to Cars</a>
+      <a [routerLink]="['/admin/cars', car()!.id, 'edit']" class="btn-primary">Edit Car</a>
     </div>
 
     <div class="detail-layout">
@@ -35,7 +35,7 @@
             </div>
             <div class="detail-item">
               <span class="detail-label">Mileage</span>
-              <span class="detail-value">{{ car()!.mileage | number }} mi</span>
+              <span class="detail-value">{{ car()!.mileage | number }} km</span>
             </div>
             <div class="detail-item">
               <span class="detail-label">Make</span>

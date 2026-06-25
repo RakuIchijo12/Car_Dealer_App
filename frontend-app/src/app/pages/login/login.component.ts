@@ -30,7 +30,7 @@ export class LoginComponent {
     this.error.set('');
     const { email, password } = this.form.value;
     this.auth.login(email!, password!).subscribe({
-      next: () => this.router.navigate(['/dashboard']),
+      next: () => this.router.navigate(['/admin/dashboard']),
       error: (e) => {
         this.error.set(e.error?.message || 'Invalid credentials');
         this.loading.set(false);
