@@ -26,6 +26,7 @@ export class CarDetailComponent implements OnInit {
   }
 
   photoUrl(photo: string) {
-    return `http://localhost:3001/uploads/${photo}`;
+    if (photo.startsWith('http')) return photo;
+    return `/uploads/${photo}`;
   }
 }

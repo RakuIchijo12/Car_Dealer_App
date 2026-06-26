@@ -87,6 +87,11 @@ export class LandingComponent implements OnInit {
   }
 
   photoUrl(photo: string) {
+    if (photo.startsWith('http')) return photo;
     return `${environment.uploadsUrl}/${photo}`;
+  }
+
+  onImgError(event: Event) {
+    (event.target as HTMLImageElement).src = '/car-placeholder.svg';
   }
 }

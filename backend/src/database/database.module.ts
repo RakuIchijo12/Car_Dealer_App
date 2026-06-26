@@ -20,6 +20,7 @@ import { Customer } from '../customers/customer.entity';
         database: config.get('POSTGRES_DB'),
         entities: [User, Car, Make, Customer],
         synchronize: true,
+        ssl: process.env.POSTGRES_HOST?.includes('neon.tech') ? { rejectUnauthorized: false } : false,
       }),
     }),
   ],

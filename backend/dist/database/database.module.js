@@ -32,6 +32,7 @@ exports.DatabaseModule = DatabaseModule = __decorate([
                     database: config.get('POSTGRES_DB'),
                     entities: [user_entity_1.User, car_entity_1.Car, make_entity_1.Make, customer_entity_1.Customer],
                     synchronize: true,
+                    ssl: process.env.POSTGRES_HOST?.includes('neon.tech') ? { rejectUnauthorized: false } : false,
                 }),
             }),
         ],

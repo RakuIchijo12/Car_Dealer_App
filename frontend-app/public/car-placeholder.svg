@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 260" fill="none">
+  <rect width="400" height="260" fill="#F1F5F9"/>
+  <!-- Road -->
+  <rect y="200" width="400" height="60" fill="#E2E8F0"/>
+  <!-- Car body -->
+  <path d="M60 160 L80 120 Q90 100 120 95 L180 88 L240 88 L290 95 Q320 100 330 120 L345 160 Z" fill="#CBD5E1"/>
+  <!-- Car roof/cabin -->
+  <path d="M130 95 L150 60 Q160 48 180 46 L230 46 Q248 46 256 58 L272 95 Z" fill="#94A3B8"/>
+  <!-- Windows -->
+  <path d="M155 94 L165 65 Q170 56 182 55 L218 55 Q228 55 234 65 L244 94 Z" fill="#BFDBFE" opacity="0.6"/>
+  <!-- Front window split -->
+  <line x1="200" y1="55" x2="200" y2="94" stroke="#94A3B8" stroke-width="2"/>
+  <!-- Wheels -->
+  <circle cx="130" cy="168" r="28" fill="#475569"/>
+  <circle cx="130" cy="168" r="16" fill="#64748B"/>
+  <circle cx="130" cy="168" r="7" fill="#CBD5E1"/>
+  <circle cx="280" cy="168" r="28" fill="#475569"/>
+  <circle cx="280" cy="168" r="16" fill="#64748B"/>
+  <circle cx="280" cy="168" r="7" fill="#CBD5E1"/>
+  <!-- Headlight -->
+  <ellipse cx="348" cy="148" rx="10" ry="7" fill="#FEF9C3" opacity="0.9"/>
+  <!-- Tail light -->
+  <ellipse cx="58" cy="148" rx="10" ry="7" fill="#FCA5A5" opacity="0.7"/>
+  <!-- Door line -->
+  <path d="M158 94 L158 155" stroke="#94A3B8" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Car bottom -->
+  <rect x="60" y="155" width="285" height="10" rx="4" fill="#94A3B8"/>
+  <!-- No Photo text -->
+  <text x="200" y="235" font-family="system-ui, sans-serif" font-size="13" fill="#94A3B8" text-anchor="middle">No Photo Available</text>
+</svg>
