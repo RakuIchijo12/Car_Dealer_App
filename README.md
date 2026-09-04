@@ -87,6 +87,8 @@ npm run photos:wiki -- --all           # re-source everything
 npm run photos:wiki -- --id=172        # one vehicle
 npm run photos:wiki -- --id=172 --offset=1   # take the next-best candidate when the
                                              # top pick is a poor photograph
+npm run photos:wiki -- --id=172 --review=3   # download 3 options to uploads/_review/
+                                             # and leave the database alone
 npm run photos:normalise               # crop, align direction, compress
 npm run photos:normalise -- --undo-flip
 ```
@@ -108,12 +110,18 @@ filtered:
 
 **Normalising.** Originals arrive anywhere from 1.3:1 to 2.6:1 and up to 3840px. They are
 cropped to 2000x1250 (16:10) using an attention-weighted crop so the car stays framed,
-mirrored where needed so the whole catalogue faces right, and encoded as progressive
+mirrored where needed so the whole catalogue faces the same way, and encoded as progressive
 mozjpeg at q84. The demo set lands at ~350 KB each.
 
+**House direction is nose-left.** Rather than mirroring everything that pointed the wrong
+way, `--review=N` was used to pull several candidates per vehicle and a genuinely
+left-facing photograph was chosen wherever Commons had one. Only three still need
+mirroring, down from eleven — which matters because mirroring also mirrors number plates
+and badge text.
+
 Mirroring is driven by an explicit list, not detection — telling which way a car points is
-a vision problem and a wrong guess silently mirrors a number plate. It is recorded in a
-manifest so `--undo-flip` restores the originals, and re-running will not double-flip.
+a vision problem and a wrong guess silently mirrors a plate. It is recorded in a manifest
+so `--undo-flip` restores the originals, and re-running will not double-flip.
 
 Crowd-sourced photography varies: a few listings show a car in a dim showroom or partly
 behind signage. `--offset=N` swaps in the next-best candidate for those. Replace the lot

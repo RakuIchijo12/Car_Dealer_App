@@ -206,6 +206,15 @@ async function run() {
   const offsetArg = args.find((a) => a.startsWith('--offset='));
   const offset = Math.max(Number(offsetArg?.split('=')[1] ?? 0), 0);
 
+  // Downloads the top N candidates per vehicle into uploads/_review/ and leaves
+  // the database alone, so they can be compared before one is chosen. Used to
+  // pick photographs by which way the car is pointing, which no filename or
+  // metadata reliably tells you.
+  const reviewArg = args.find((a) => a.startsWith('--review'));
+  const reviewCount = reviewArg ? Number(reviewArg.split('=')[1] ?? 3) : 0;
+  const reviewDir = path.join(UPLOADS_DIR, '_review');
+  if (reviewCount) fs.mkdirSync(reviewDir, { recursive: true });
+
   fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 
   const app = await NestFactory.createApplicationContext(AppModule, { logger: ['error'] });
@@ -251,6 +260,31 @@ async function run() {
       const found = (await search(q, car.year)).filter((c) => !seen.has(c.title));
       found.forEach((c) => seen.add(c.title));
       found.sort((a, b) => b.score - a.score);
+
+      // Review mode collects several options rather than committing to one.
+      if (reviewCount) {
+        let saved = 0;
+        for (const cand of found.slice(0, reviewCount * 2)) {
+          if (saved >= reviewCount) break;
+          const buf = await download(cand.url);
+          if (!buf) continue;
+          const meta = await sharp(buf).metadata();
+          if ((meta.width ?? 0) < MIN_SOURCE_WIDTH) continue;
+
+          const slug = `${make.toLowerCase()}-${car.model.toLowerCase().replace(/[\s/]+/g, '-')}`;
+          fs.writeFileSync(path.join(reviewDir, `${slug}__${saved}.jpg`), buf);
+          saved++;
+          await sleep(400);
+        }
+        if (saved) {
+          console.log(`⋯ ${saved} candidate(s) for review`);
+          ok++;
+        } else {
+          console.log('✗ no candidates');
+          missed.push(label);
+        }
+        break;
+      }
 
       for (const cand of found.slice(offset, offset + 4)) {
         const buf = await download(cand.url);

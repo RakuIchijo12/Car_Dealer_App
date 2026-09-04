@@ -12,6 +12,9 @@ import sharp from 'sharp';
  * 16:10 around the image's centre of interest fixes the framing, and mirroring
  * the minority fixes the direction.
  *
+ * House direction is nose-LEFT. Photographs were chosen for it wherever Commons
+ * offered a left-facing option, so only a handful need mirroring at all.
+ *
  *   npm run photos:normalise                  crop, align, compress
  *   npm run photos:normalise -- --undo-flip   put mirrored photos back
  *
@@ -28,24 +31,17 @@ const OUT_H = 1250;
 const QUALITY = 84;
 
 /**
- * Files whose subject faces LEFT and therefore needs mirroring, so the whole
- * catalogue reads front-three-quarter facing RIGHT.
+ * The few photographs that still face RIGHT and so need mirroring to match the
+ * nose-left house direction.
  *
- * Mirroring also mirrors number plates and badge text — an accepted trade-off
- * for a uniform catalogue. Replace with your own photography before trading.
+ * Mirroring also mirrors number plates and badge text, so the list is kept as
+ * short as possible: for every other vehicle a genuinely left-facing photograph
+ * was sourced instead. Replace the lot with your own photography before trading.
  */
-const FACING_LEFT: string[] = [
-  'ford-everest-2023.jpg',
-  'ford-territory-2022.jpg',
-  'honda-city-2022.jpg',
-  'hyundai-creta-2023.jpg',
-  'kia-sportage-2023.jpg',
-  'mitsubishi-mirage-g4-2022.jpg',
-  'mitsubishi-outlander-2023.jpg',
-  'nissan-navara-2022.jpg',
-  'suzuki-xl7-2023.jpg',
-  'toyota-hilux-2022.jpg',
-  'toyota-rush-2022.jpg',
+const FACING_WRONG_WAY: string[] = [
+  'kia-carnival-2023.jpg',
+  'suzuki-swift-2022.jpg',
+  'toyota-wigo-2023.jpg',
 ];
 
 const kb = (n: number) => Math.round(n / 1024);
@@ -88,7 +84,7 @@ async function run() {
     return;
   }
 
-  console.log(`\n🎞  Normalising ${files.length} photos → ${OUT_W}x${OUT_H}, facing right\n`);
+  console.log(`\n🎞  Normalising ${files.length} photos → ${OUT_W}x${OUT_H}, nose facing left\n`);
 
   const previouslyFlipped = readManifest();
 
@@ -111,11 +107,11 @@ async function run() {
       // Only mirror a file that has not already been mirrored. Without this a
       // second run flips it back and the catalogue loses its alignment.
       const alreadyFlipped = previouslyFlipped.includes(file);
-      if (FACING_LEFT.includes(file) && !alreadyFlipped) {
+      if (FACING_WRONG_WAY.includes(file) && !alreadyFlipped) {
         pipeline = pipeline.flop();
         flipped++;
       }
-      if (FACING_LEFT.includes(file)) flippedFiles.push(file);
+      if (FACING_WRONG_WAY.includes(file)) flippedFiles.push(file);
 
       // `attention` biases the crop toward the busiest region, which on a
       // photograph of a car parked in a street is the car.
@@ -133,7 +129,7 @@ async function run() {
       fs.writeFileSync(full, out);
       after += out.length;
 
-      const flag = FACING_LEFT.includes(file) ? (previouslyFlipped.includes(file) ? ' =' : ' ⇄') : '  ';
+      const flag = FACING_WRONG_WAY.includes(file) ? (previouslyFlipped.includes(file) ? ' =' : ' ⇄') : '  ';
       console.log(
         `  ${flag} ${file.padEnd(34)} ${String(meta.width) + 'x' + meta.height} → ` +
           `${OUT_W}x${OUT_H}  ${kb(original)} → ${kb(out.length)} KB`,
