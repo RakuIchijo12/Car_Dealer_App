@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { Title, Meta } from '@angular/platform-browser';
 import { PublicService } from '../../core/services/public.service';
-import { Car, Make, PublicStats } from '../../core/models';
+import { Car, Facets, Make, PublicStats } from '../../core/models';
 import { BRAND, BRAND_FULL } from '../../core/brand';
 import { CarCardComponent } from '../../shared/car-card.component';
 import { RevealDirective } from '../../shared/reveal.directive';
@@ -33,6 +33,7 @@ export class HomeComponent implements OnInit {
   featured = signal<Car[]>([]);
   makes = signal<Make[]>([]);
   stats = signal<PublicStats | null>(null);
+  facets = signal<Facets | null>(null);
   loading = signal(true);
 
   quickSearch = '';
@@ -112,6 +113,15 @@ export class HomeComponent implements OnInit {
 
     this.publicSvc.getMakes().subscribe((m) => this.makes.set(m.filter((x) => (x.carCount ?? 0) > 0)));
     this.publicSvc.getStats().subscribe((s) => this.stats.set(s));
+
+    // Powers the live count on each body-type card, so the row reflects real
+    // stock rather than being a static list of shapes.
+    this.publicSvc.getFacets().subscribe((f) => this.facets.set(f));
+  }
+
+  /** How many listed vehicles share this body type. */
+  countFor(bodyType: string): number {
+    return this.facets()?.bodyTypes.find((b) => b.value === bodyType)?.count ?? 0;
   }
 
   /** Hero search hands off to the inventory page with query params. */

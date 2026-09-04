@@ -159,28 +159,77 @@
 }
 
 /* ═══════════════ BODY TYPES ═══════════════ */
-.bt-section { padding-top: clamp(2.5rem, 5vw, 4rem); }
+/* The shape row and the featured grid read as one thought, so the usual full
+   section gap between them is trimmed — it left a dead band of empty page. */
+.bt-section {
+  padding-top: clamp(2.5rem, 5vw, 4rem);
+  padding-bottom: clamp(1.5rem, 3vw, 2.5rem);
+}
+.feat-section { padding-top: clamp(2rem, 4vw, 3rem); }
 
 .bt-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(168px, 1fr));
+  gap: 0.9rem;
 }
 
 .bt-card {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.85rem;
-  padding: 1.6rem 1rem;
-  text-align: center;
+  align-items: flex-start;
+  gap: 1.1rem;
+  padding: 1.5rem 1.35rem 1.25rem;
+  border-radius: var(--r-lg);
+  border: 1px solid var(--hairline);
+  background: var(--card);
+  transition: transform 0.4s var(--ease), border-color 0.3s, box-shadow 0.4s var(--ease);
 }
-.bt-art { color: var(--text-2); transition: color 0.3s; }
-.bt-art svg { width: 62px; height: 32px; }
-.bt-card:hover .bt-art { color: var(--amber); }
+.bt-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--amber-line);
+  box-shadow: var(--shadow-lg);
+}
 
-.bt-label { font-size: 0.88rem; font-weight: 600; }
+/* Amber wash that blooms from the lower-left on hover. */
+.bt-glow {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: radial-gradient(120% 90% at 12% 100%, var(--amber-soft), transparent 62%);
+  opacity: 0;
+  transition: opacity 0.4s var(--ease);
+}
+.bt-card:hover .bt-glow { opacity: 1; }
+
+.bt-art {
+  display: block;
+  color: var(--text);
+  opacity: 0.72;
+  transition: color 0.3s, opacity 0.3s, transform 0.4s var(--ease);
+}
+.bt-art svg { width: 104px; height: 58px; display: block; overflow: visible; }
+.bt-card:hover .bt-art { color: var(--amber); opacity: 1; transform: translateX(4px); }
+
+.bt-text { display: flex; flex-direction: column; gap: 0.15rem; }
+.bt-label {
+  font-family: 'Sora', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.bt-count {
+  font-size: 0.73rem;
+  color: var(--text-3);
+  transition: color 0.3s;
+}
+.bt-card:hover .bt-count { color: var(--amber); }
+
+/* Nothing in stock: still navigable, just visibly quieter. */
+.bt-card.empty { opacity: 0.55; }
+.bt-card.empty:hover { opacity: 0.85; }
 
 /* ═══════════════ BRANDS ═══════════════ */
 .brands-section { padding-block: clamp(1.5rem, 3vw, 2.5rem); }
