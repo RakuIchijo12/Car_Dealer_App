@@ -80,7 +80,7 @@
   aspect-ratio: 4 / 3;
   border-radius: var(--r);
   border: 1.5px dashed var(--hairline-2);
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--raise-1);
   color: var(--text-3);
   cursor: pointer;
   text-align: center;
@@ -136,7 +136,7 @@
   padding: 0.08rem 0.32rem;
   border-radius: 4px;
   background: var(--grad);
-  color: #1A1000;
+  color: var(--on-amber);
   font-size: 0.55rem;
   font-weight: 800;
   text-transform: uppercase;

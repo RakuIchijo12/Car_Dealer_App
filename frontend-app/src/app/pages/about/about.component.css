@@ -137,7 +137,7 @@
   overflow: hidden;
   padding: clamp(2.75rem, 6vw, 5rem) clamp(1.5rem, 5vw, 4rem);
   text-align: center;
-  background: linear-gradient(160deg, rgba(255, 176, 32, 0.09), rgba(255, 255, 255, 0.02));
+  background: linear-gradient(160deg, rgba(255, 176, 32, 0.09), var(--raise-1));
   border-color: var(--amber-line);
 }
 .cta .aurora::before { width: 60vw; height: 60vw; top: -50%; right: -20%; opacity: 0.7; }

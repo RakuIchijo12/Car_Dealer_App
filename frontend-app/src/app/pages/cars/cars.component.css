@@ -17,7 +17,7 @@
   padding: 3px;
   border-radius: 10px;
   border: 1px solid var(--hairline);
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--raise-1);
 }
 .vt-btn {
   display: grid;
@@ -33,7 +33,7 @@
 }
 .vt-btn svg { width: 15px; height: 15px; }
 .vt-btn:hover { color: var(--text); }
-.vt-btn.active { background: rgba(255, 255, 255, 0.08); color: var(--amber); }
+.vt-btn.active { background: var(--raise-3); color: var(--amber); }
 
 /* ═══════════════ FILTERS ═══════════════ */
 .filters { padding: 1rem; display: flex; flex-direction: column; gap: 0.8rem; }
@@ -97,7 +97,7 @@
 }
 .ac-star svg { width: 15px; height: 15px; }
 .ac-star:hover { transform: scale(1.08); }
-.ac-star.on { background: var(--grad); border-color: transparent; color: #1A1000; }
+.ac-star.on { background: var(--grad); border-color: transparent; color: var(--on-amber); }
 
 .ac-body { padding: 0.95rem 1rem 1rem; display: flex; flex-direction: column; flex: 1; }
 .ac-name { font-size: 1rem; font-weight: 700; transition: color 0.2s; }
@@ -138,13 +138,13 @@
   height: 30px;
   border-radius: 8px;
   border: 1px solid var(--hairline);
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--raise-1);
   color: var(--text-2);
   cursor: pointer;
   transition: all 0.2s;
 }
 .act svg { width: 14px; height: 14px; }
-.act:hover { color: var(--text); border-color: var(--hairline-2); background: rgba(255, 255, 255, 0.08); }
+.act:hover { color: var(--text); border-color: var(--hairline-2); background: var(--raise-3); }
 .act.on { color: var(--amber); border-color: var(--amber-line); background: var(--amber-soft); }
 .act-del:hover { color: var(--red); border-color: rgba(255, 90, 90, 0.4); background: var(--red-soft); }
 
@@ -167,7 +167,7 @@
 .th-right-actions { justify-content: flex-end; }
 .table td { padding: 0.7rem; border-bottom: 1px solid var(--hairline); vertical-align: middle; }
 .table tbody tr:last-child td { border-bottom: none; }
-.table tbody tr:hover { background: rgba(255, 255, 255, 0.025); }
+.table tbody tr:hover { background: var(--raise-1); }
 
 .cell-car { display: flex; align-items: center; gap: 0.7rem; }
 .cell-thumb {
@@ -206,3 +206,12 @@ a.cell-car:hover .cell-title { color: var(--amber); }
   .page-head { flex-direction: column; align-items: flex-start; }
   .head-actions { width: 100%; justify-content: space-between; }
 }
+
+/* Status badges sit on a photograph here — a translucent tint vanishes against
+   a busy image, so give them their own dark ground in both themes. */
+.ac-media .badge {
+  background: rgba(7, 8, 12, 0.72);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.ac-media .badge-featured { background: var(--grad); }

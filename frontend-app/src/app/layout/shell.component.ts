@@ -3,6 +3,7 @@ import { RouterModule, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../core/services/auth.service';
 import { LeadsService } from '../core/services/leads.service';
 import { BRAND } from '../core/brand';
+import { ThemeToggleComponent } from '../shared/theme-toggle.component';
 
 interface NavItem {
   label: string;
@@ -15,7 +16,7 @@ interface NavItem {
 @Component({
   selector: 'app-shell',
   standalone: true,
-  imports: [RouterModule, RouterLink, RouterLinkActive],
+  imports: [RouterModule, RouterLink, RouterLinkActive, ThemeToggleComponent],
   templateUrl: './shell.component.html',
   styleUrl: './shell.component.css',
 })

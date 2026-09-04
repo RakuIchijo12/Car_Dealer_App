@@ -62,7 +62,7 @@
   flex-shrink: 0;
   border-radius: 50%;
   background: var(--grad);
-  color: #1A1000;
+  color: var(--on-amber);
   font-family: 'Sora', sans-serif;
   font-size: 0.95rem;
   font-weight: 800;
@@ -120,13 +120,13 @@
   height: 30px;
   border-radius: 8px;
   border: 1px solid var(--hairline);
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--raise-1);
   color: var(--text-2);
   cursor: pointer;
   transition: all 0.2s;
 }
 .act svg { width: 14px; height: 14px; }
-.act:hover { color: var(--text); border-color: var(--hairline-2); background: rgba(255, 255, 255, 0.08); }
+.act:hover { color: var(--text); border-color: var(--hairline-2); background: var(--raise-3); }
 .act-wa:hover { color: #25D366; border-color: rgba(37, 211, 102, 0.4); }
 .act-del:hover { color: var(--red); border-color: rgba(255, 90, 90, 0.4); background: var(--red-soft); }
 
@@ -151,7 +151,7 @@
   position: fixed;
   inset: 0;
   z-index: 970;
-  background: rgba(7, 8, 12, 0.7);
+  background: var(--backdrop);
   backdrop-filter: blur(4px);
   animation: fade 0.25s ease;
 }
@@ -191,7 +191,7 @@
   cursor: pointer;
   font-size: 0.8rem;
 }
-.dr-close:hover { color: var(--text); background: rgba(255, 255, 255, 0.06); }
+.dr-close:hover { color: var(--text); background: var(--raise-2); }
 
 .dr-body { flex: 1; overflow-y: auto; padding: 1.35rem; display: flex; flex-direction: column; gap: 1.6rem; }
 
@@ -227,7 +227,7 @@
   margin: 0;
   padding: 0.9rem 1rem;
   border-radius: var(--r-sm);
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--raise-1);
   border: 1px solid var(--hairline);
   font-size: 0.855rem;
   line-height: 1.7;

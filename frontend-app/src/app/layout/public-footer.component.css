@@ -58,7 +58,7 @@
   height: 36px;
   border-radius: 10px;
   border: 1px solid var(--hairline);
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--raise-1);
   color: var(--text-2);
   transition: all 0.25s var(--ease);
 }

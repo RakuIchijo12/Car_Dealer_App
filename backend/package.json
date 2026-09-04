@@ -21,7 +21,9 @@
     "seed": "ts-node -r tsconfig-paths/register src/seed.ts",
     "photos": "ts-node -r tsconfig-paths/register src/fill-photos.ts && npm run photos:optimize",
     "photos:optimize": "ts-node -r tsconfig-paths/register src/optimize-photos.ts",
-    "photos:fetch": "ts-node -r tsconfig-paths/register src/fill-photos.ts"
+    "photos:fetch": "ts-node -r tsconfig-paths/register src/fill-photos.ts",
+    "photos:direction": "ts-node -r tsconfig-paths/register src/normalize-photo-direction.ts",
+    "photos:carimages": "ts-node -r tsconfig-paths/register src/fetch-carimages.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",

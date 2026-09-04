@@ -62,6 +62,39 @@ npm run photos:optimize # re-encode on its own (also good after bulk uploads)
 `photos:optimize` downscales to 1600px and re-encodes as progressive JPEG. On the demo set
 that takes the photo folder from 47 MB to 5 MB — worth running after any manual upload.
 
+### Uniform photo direction
+
+The storefront reads best when every vehicle faces the same way. House style is
+front-three-quarter **facing right**:
+
+```bash
+npm run photos:direction              # mirror the odd ones out
+npm run photos:direction -- --undo    # put them back
+```
+
+Mirroring also mirrors number plates and badge text — the accepted trade-off for a uniform
+catalogue, and the same technique CarImages uses for its "mirrored right-facing" variants.
+Replace these with your own photography of your actual stock before trading.
+
+### Studio photography via CarImages (optional)
+
+For genuinely uniform imagery — every vehicle at the same angle on the same background —
+wire up [CarImages](https://carimagesapi.com). It needs **two** credentials; the key alone
+will not authenticate:
+
+```bash
+# backend/.env
+CARIMAGES_API_KEY=ci_...        # identifies the account, safe client-side
+CARIMAGES_API_SECRET=...        # authorises the request, server-side only
+CARIMAGES_ANGLE=front34         # the classic three-quarter
+```
+
+```bash
+npm run photos:carimages            # only vehicles missing a photo
+npm run photos:carimages -- --all   # re-shoot the whole inventory
+npm run photos:optimize             # then compress
+```
+
 ### 4. Run
 
 ```bash
@@ -77,6 +110,32 @@ npm run dev             # API on :3001, web on :4200
 **Demo login:** `admin@veloramotors.ph` / `admin123` — change this before going live.
 
 ---
+
+## Theming
+
+The storefront and back office ship in **light, dark and system**. System follows the
+visitor's OS setting and switches live when it changes; an explicit choice is remembered
+per browser and always wins.
+
+Visitors switch it from the sun/moon button in the header; staff get a Light / System / Dark
+segmented control at the bottom of the admin sidebar.
+
+Both palettes are defined in one place — `frontend-app/src/styles.css`:
+
+- `:root` holds the **light** palette (the default)
+- `@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) }` handles system dark
+- `:root[data-theme="dark"]` handles the explicit choice
+
+Components only ever reference tokens (`--surface`, `--text-2`, `--raise-1`, `--scrim`…),
+never raw colours, so both themes stay in sync from that single file. Change a brand colour
+once and it lands everywhere.
+
+Two deliberate exceptions stay dark in both themes, because white chrome over a bright
+photograph is unreadable: overlay buttons sitting on vehicle images, and the fullscreen
+lightbox.
+
+`index.html` resolves the theme in a tiny inline script before first paint, so there is no
+white flash on load for dark-mode visitors.
 
 ## Renaming the dealership
 

@@ -2,10 +2,35 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>DealerOS</title>
+  <title>Velora Motors — Quality Pre-Owned Cars in Davao City</title>
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <meta name="description" content="Hand-picked, fully inspected pre-owned vehicles in Davao City. Complete papers, honest pricing, financing ready.">
+  <meta name="theme-color" content="#07080C">
+
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="apple-touch-icon" href="favicon.svg">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <!--
+    Resolve the theme before first paint. Without this the page renders in the
+    default light palette for a frame, then snaps to dark once Angular boots.
+  -->
+  <script>
+    (function () {
+      try {
+        var choice = localStorage.getItem('velora_theme') || 'system';
+        var dark = choice === 'dark' ||
+          (choice === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        if (choice !== 'system') document.documentElement.setAttribute('data-theme', choice);
+        document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
+        var meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) meta.setAttribute('content', dark ? '#07080C' : '#F6F7FA');
+      } catch (e) { /* private mode — fall back to the stylesheet default */ }
+    })();
+  </script>
 </head>
 <body>
   <app-root></app-root>

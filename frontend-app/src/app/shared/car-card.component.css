@@ -5,7 +5,7 @@
   flex-direction: column;
   height: 100%;
   overflow: hidden;
-  background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.012));
+  background: var(--card);
 }
 
 /* ── Media ── */
@@ -87,7 +87,7 @@
 .cc-act.on {
   background: var(--grad);
   border-color: transparent;
-  color: #1A1000;
+  color: var(--on-amber);
 }
 
 .cc-year {
@@ -104,7 +104,7 @@
   border-radius: 6px;
   background: rgba(7, 8, 12, 0.55);
   backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--raise-3);
 }
 
 /* ── Body ── */
@@ -191,6 +191,15 @@
 .cc:hover .cc-arrow {
   background: var(--grad);
   border-color: transparent;
-  color: #1A1000;
+  color: var(--on-amber);
   transform: translateX(3px);
 }
+
+/* Status badges sit on a photograph here — a translucent tint vanishes against
+   a busy image, so give them their own dark ground in both themes. */
+.cc-flags .badge {
+  background: rgba(7, 8, 12, 0.72);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.cc-flags .badge-featured { background: var(--grad); }

@@ -104,7 +104,7 @@
 .bars { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.7rem; }
 .bar-row { display: grid; grid-template-columns: 74px 1fr 26px; align-items: center; gap: 0.7rem; }
 .bar-label { font-size: 0.79rem; color: var(--text-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.bar-track { height: 7px; border-radius: 99px; background: rgba(255, 255, 255, 0.06); overflow: hidden; }
+.bar-track { height: 7px; border-radius: 99px; background: var(--raise-2); overflow: hidden; }
 .bar-fill {
   display: block;
   height: 100%;
@@ -126,10 +126,10 @@
   padding: 0.9rem 0.4rem;
   border-radius: var(--r-sm);
   border: 1px solid var(--hairline);
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--raise-1);
   transition: all 0.22s;
 }
-.stage:hover { border-color: var(--hairline-2); background: rgba(255, 255, 255, 0.05); transform: translateY(-2px); }
+.stage:hover { border-color: var(--hairline-2); background: var(--raise-2); transform: translateY(-2px); }
 .stage-n { font-family: 'Sora', sans-serif; font-size: 1.35rem; font-weight: 800; line-height: 1; }
 .stage-badge { font-size: 0.6rem; padding: 0.15rem 0.45rem; }
 .pipeline-total { margin: 1.1rem 0 0; font-size: 0.76rem; color: var(--text-3); text-align: center; }
@@ -151,7 +151,7 @@
 .table td { padding: 0.75rem 0.6rem; border-bottom: 1px solid var(--hairline); vertical-align: middle; }
 .table tbody tr:last-child td { border-bottom: none; }
 .table tbody tr { transition: background 0.18s; }
-.table tbody tr:hover { background: rgba(255, 255, 255, 0.025); }
+.table tbody tr:hover { background: var(--raise-1); }
 
 .cell-car { display: flex; align-items: center; gap: 0.7rem; }
 .cell-thumb {
@@ -181,7 +181,7 @@ a.cell-car:hover .cell-title { color: var(--amber); }
   border-radius: var(--r-sm);
   transition: background 0.2s;
 }
-.viewed-link:hover { background: rgba(255, 255, 255, 0.04); }
+.viewed-link:hover { background: var(--raise-1); }
 .viewed-thumb {
   width: 52px;
   height: 39px;

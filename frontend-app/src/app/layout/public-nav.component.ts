@@ -2,11 +2,12 @@ import { Component, HostListener, inject, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { BRAND } from '../core/brand';
 import { ShortlistService } from '../core/services/shortlist.service';
+import { ThemeToggleComponent } from '../shared/theme-toggle.component';
 
 @Component({
   selector: 'app-public-nav',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive],
+  imports: [RouterLink, RouterLinkActive, ThemeToggleComponent],
   templateUrl: './public-nav.component.html',
   styleUrl: './public-nav.component.css',
 })

@@ -56,7 +56,7 @@
   padding: 0 5px;
   border-radius: 99px;
   background: var(--grad);
-  color: #1A1000;
+  color: var(--on-amber);
   font-size: 0.68rem;
   font-weight: 800;
 }
@@ -179,7 +179,7 @@
   place-items: center;
   border-radius: 10px;
   border: 1px solid var(--hairline);
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--raise-1);
   color: var(--text-2);
   font-size: 0.85rem;
   font-weight: 600;
@@ -190,9 +190,9 @@
 .pg-btn:hover:not(:disabled):not(.active) {
   color: var(--text);
   border-color: var(--hairline-2);
-  background: rgba(255, 255, 255, 0.07);
+  background: var(--raise-2);
 }
-.pg-btn.active { background: var(--grad); border-color: transparent; color: #1A1000; font-weight: 800; }
+.pg-btn.active { background: var(--grad); border-color: transparent; color: var(--on-amber); font-weight: 800; }
 .pg-btn:disabled { opacity: 0.35; cursor: not-allowed; }
 .pg-gap { color: var(--text-3); padding-inline: 0.2rem; }
 
@@ -219,7 +219,7 @@
   position: fixed;
   inset: 0;
   z-index: 940;
-  background: rgba(7, 8, 12, 0.72);
+  background: var(--backdrop);
   backdrop-filter: blur(4px);
   animation: fade 0.25s ease;
 }
@@ -247,7 +247,7 @@
     border-top: none;
     border-bottom: none;
     padding: 1.25rem 1.25rem 3rem;
-    background: rgba(11, 13, 19, 0.98);
+    background: var(--scrim-strong);
   }
   .f-close { display: block; }
 }

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Velora Motors">
+  <defs>
+    <linearGradient id="v" x1="8" y1="8" x2="56" y2="56" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFC24A"/>
+      <stop offset="1" stop-color="#FF7A18"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="64" height="64" rx="15" fill="#0B0D13"/>
+
+  <!-- The Velora double-slash mark -->
+  <path d="M11 43 L25 12 L35 12 L21 43 Z" fill="url(#v)"/>
+  <path d="M31 43 L45 12 L55 12 L41 43 Z" fill="url(#v)" opacity="0.58"/>
+  <rect x="11" y="48" width="44" height="5" rx="2.5" fill="url(#v)"/>
+</svg>

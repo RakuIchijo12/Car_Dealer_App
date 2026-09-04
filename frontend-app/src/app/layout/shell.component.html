@@ -66,6 +66,10 @@
         <span class="sb-label">View storefront</span>
       </a>
 
+      <div class="sb-theme">
+        <app-theme-toggle variant="segmented" />
+      </div>
+
       <div class="sb-user">
         <span class="sb-avatar" aria-hidden="true">{{ auth.initials() }}</span>
         <span class="sb-user-info">
@@ -94,6 +98,7 @@
 
       <!-- Each page carries its own primary action, so the bar stays contextual. -->
       <div class="tb-actions">
+        <app-theme-toggle variant="compact" />
         <a [href]="'tel:' + brand.contact.phoneRaw" class="tb-phone" title="Dealership line">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3.1 19.5 19.5 0 01-6-6A19.8 19.8 0 012.1 4.2 2 2 0 014.1 2h3a2 2 0 012 1.7c.1 1 .4 1.9.7 2.8a2 2 0 01-.5 2.1L8.1 9.9a16 16 0 006 6l1.3-1.2a2 2 0 012.1-.5c.9.3 1.8.6 2.8.7a2 2 0 011.7 2z" />

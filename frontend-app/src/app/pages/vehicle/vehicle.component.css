@@ -87,7 +87,7 @@
   border-radius: 99px;
   background: rgba(7, 8, 12, 0.62);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--raise-3);
   font-size: 0.75rem;
   font-weight: 600;
 }
@@ -137,7 +137,7 @@
   padding: 0.3rem 0.75rem;
   border-radius: 99px;
   border: 1px solid var(--hairline);
-  background: rgba(255, 255, 255, 0.035);
+  background: var(--raise-1);
   font-size: 0.76rem;
   color: var(--text-2);
 }
@@ -151,14 +151,14 @@
   height: 38px;
   border-radius: 50%;
   border: 1px solid var(--hairline-2);
-  background: rgba(255, 255, 255, 0.035);
+  background: var(--raise-1);
   color: var(--text-2);
   cursor: pointer;
   transition: all 0.22s;
 }
 .icon-act svg { width: 16px; height: 16px; }
-.icon-act:hover { color: var(--text); border-color: var(--hairline-2); background: rgba(255,255,255,0.08); }
-.icon-act.on { background: var(--grad); border-color: transparent; color: #1A1000; }
+.icon-act:hover { color: var(--text); border-color: var(--hairline-2); background: var(--raise-3); }
+.icon-act.on { background: var(--grad); border-color: transparent; color: var(--on-amber); }
 
 /* ═══════════════ BLOCKS ═══════════════ */
 .veh-block { padding: 1.6rem; }
@@ -341,13 +341,13 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  border: 1px solid var(--hairline-2);
-  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.08);
   color: #fff;
   font-size: 1rem;
   cursor: pointer;
 }
-.lb-close:hover { background: rgba(255, 255, 255, 0.14); }
+.lb-close:hover { background: rgba(255, 255, 255, 0.2); }
 .lb-nav {
   position: absolute;
   top: 50%;
@@ -357,8 +357,8 @@
   width: 46px;
   height: 46px;
   border-radius: 50%;
-  border: 1px solid var(--hairline-2);
-  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.08);
   color: #fff;
   cursor: pointer;
 }
@@ -382,3 +382,12 @@
   .veh-block { padding: 1.25rem; }
   .spec-grid { grid-template-columns: repeat(2, 1fr); }
 }
+
+/* Status badges sit on a photograph here — a translucent tint vanishes against
+   a busy image, so give them their own dark ground in both themes. */
+.gal-flags .badge {
+  background: rgba(7, 8, 12, 0.72);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.gal-flags .badge-featured { background: var(--grad); }
