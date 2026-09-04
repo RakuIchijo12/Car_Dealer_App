@@ -1,0 +1,196 @@
+:host { display: block; height: 100%; }
+
+.cc {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.012));
+}
+
+/* ── Media ── */
+.cc-media {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.cc-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transform: scale(1.02);
+  transition: opacity 0.6s var(--ease), transform 0.8s var(--ease);
+}
+.cc-img.loaded { opacity: 1; }
+.cc:hover .cc-img { transform: scale(1.08); }
+
+.cc-img-skeleton { position: absolute; inset: 0; border-radius: 0; }
+
+.cc-shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(7, 8, 12, 0.75) 0%, transparent 45%);
+  pointer-events: none;
+}
+
+/* ── Overlays ── */
+.cc-flags {
+  position: absolute;
+  top: 0.7rem;
+  left: 0.7rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  z-index: 2;
+}
+
+.cc-sale {
+  background: var(--red);
+  color: #fff;
+  border: none;
+}
+
+.cc-actions {
+  position: absolute;
+  top: 0.7rem;
+  right: 0.7rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  z-index: 2;
+  opacity: 0;
+  transform: translateX(8px);
+  transition: opacity 0.3s var(--ease), transform 0.3s var(--ease);
+}
+.cc:hover .cc-actions,
+.cc:focus-within .cc-actions { opacity: 1; transform: none; }
+
+.cc-act {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(7, 8, 12, 0.72);
+  backdrop-filter: blur(10px);
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.22s var(--ease);
+}
+.cc-act svg { width: 15px; height: 15px; }
+.cc-act:hover { background: rgba(7, 8, 12, 0.92); transform: scale(1.1); }
+.cc-act.on {
+  background: var(--grad);
+  border-color: transparent;
+  color: #1A1000;
+}
+
+.cc-year {
+  position: absolute;
+  left: 0.85rem;
+  bottom: 0.75rem;
+  z-index: 2;
+  font-family: 'Sora', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.92);
+  padding: 0.18rem 0.55rem;
+  border-radius: 6px;
+  background: rgba(7, 8, 12, 0.55);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* ── Body ── */
+.cc-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: 1rem 1.1rem 1.1rem;
+}
+
+.cc-make {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--amber);
+}
+
+.cc-model {
+  font-size: 1.12rem;
+  font-weight: 700;
+  margin-top: 0.22rem;
+  line-height: 1.25;
+}
+
+.cc-specs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.9rem;
+  list-style: none;
+  margin: 0.75rem 0 0;
+  padding: 0;
+}
+.cc-specs li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.32rem;
+  font-size: 0.76rem;
+  color: var(--text-2);
+  white-space: nowrap;
+}
+.cc-specs svg { width: 13px; height: 13px; color: var(--text-3); flex-shrink: 0; }
+
+.cc-foot {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: auto;
+  padding-top: 0.9rem;
+}
+
+.cc-prices { display: flex; flex-direction: column; gap: 0.1rem; min-width: 0; }
+
+.cc-was {
+  font-size: 0.74rem;
+  color: var(--text-3);
+  text-decoration: line-through;
+}
+
+.cc-price {
+  font-family: 'Sora', sans-serif;
+  font-size: 1.22rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  background: var(--grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.cc-arrow {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 1px solid var(--hairline-2);
+  color: var(--text-2);
+  transition: all 0.3s var(--ease);
+}
+.cc-arrow svg { width: 15px; height: 15px; }
+.cc:hover .cc-arrow {
+  background: var(--grad);
+  border-color: transparent;
+  color: #1A1000;
+  transform: translateX(3px);
+}

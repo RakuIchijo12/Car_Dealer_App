@@ -1,0 +1,223 @@
+<div class="page">
+
+  <header class="page-head">
+    <div>
+      <h1 class="page-title">Leads</h1>
+      <p class="page-sub">
+        @if (stats(); as s) { {{ s.total }} enquiries · {{ s.new }} awaiting first contact }
+        @else { Customer enquiries from the storefront }
+      </p>
+    </div>
+  </header>
+
+  <!-- ═══════════════ FILTER BAR ═══════════════ -->
+  <div class="bar card">
+    <div class="bar-search">
+      <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+        <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+      </svg>
+      <input
+        class="input bar-input"
+        [ngModel]="search"
+        (ngModelChange)="onSearch($event)"
+        placeholder="Search name, phone, email or message…"
+        aria-label="Search leads"
+      />
+    </div>
+
+    <div class="bar-filters">
+      <button class="pill" [class.active]="!statusFilter" (click)="setFilter('')">
+        All @if (stats()) { <span class="pill-n">{{ stats()!.total }}</span> }
+      </button>
+      @for (s of statuses; track s) {
+        <button class="pill" [class.active]="statusFilter === s" (click)="setFilter(s)">
+          {{ humanize(s) }} <span class="pill-n">{{ countFor(s) }}</span>
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- ═══════════════ LIST ═══════════════ -->
+  @if (loading()) {
+    <div class="list">
+      @for (s of [0,1,2,3,4]; track s) { <div class="skeleton sk-row"></div> }
+    </div>
+  } @else if (leads().length) {
+    <div class="list">
+      @for (lead of leads(); track lead.id) {
+        <article class="lead card" [class.is-new]="lead.status === 'new'">
+
+          <button class="lead-main" (click)="open(lead)">
+            <span class="lead-avatar" aria-hidden="true">{{ lead.name.charAt(0).toUpperCase() }}</span>
+
+            <span class="lead-body">
+              <span class="lead-top">
+                <span class="lead-name">{{ lead.name }}</span>
+                <span class="badge badge-neutral lead-type">{{ humanize(lead.type) }}</span>
+              </span>
+
+              <span class="lead-meta">
+                {{ lead.phone }}
+                @if (lead.email) { <span class="lead-dot">·</span> {{ lead.email }} }
+                <span class="lead-dot">·</span> {{ timeAgo(lead.createdAt) }}
+              </span>
+
+              @if (lead.car) {
+                <span class="lead-car">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                    <path d="M5 17V12l2-5h10l2 5v5M3 17h18" stroke-linecap="round" stroke-linejoin="round" />
+                    <circle cx="7.5" cy="17" r="2" /><circle cx="16.5" cy="17" r="2" />
+                  </svg>
+                  {{ carTitle(lead.car) }}
+                </span>
+              } @else if (lead.tradeInVehicle) {
+                <span class="lead-car">Trade-in: {{ lead.tradeInVehicle }}</span>
+              }
+
+              @if (lead.message) {
+                <span class="lead-msg truncate-2">{{ lead.message }}</span>
+              }
+            </span>
+          </button>
+
+          <div class="lead-side">
+            <select
+              class="input status-select status-{{ lead.status }}"
+              [ngModel]="lead.status"
+              (ngModelChange)="setStatus(lead, $event)"
+              [attr.aria-label]="'Status for ' + lead.name"
+            >
+              @for (s of statuses; track s) {
+                <option [value]="s">{{ humanize(s) }}</option>
+              }
+            </select>
+
+            <div class="lead-actions">
+              <a [href]="telLink(lead.phone)" class="act" title="Call" aria-label="Call">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3.1 19.5 19.5 0 01-6-6A19.8 19.8 0 012.1 4.2 2 2 0 014.1 2h3a2 2 0 012 1.7c.1 1 .4 1.9.7 2.8a2 2 0 01-.5 2.1L8.1 9.9a16 16 0 006 6l1.3-1.2a2 2 0 012.1-.5c.9.3 1.8.6 2.8.7a2 2 0 011.7 2z" />
+                </svg>
+              </a>
+              <a [href]="waLink(lead)" target="_blank" rel="noopener noreferrer" class="act act-wa" title="WhatsApp" aria-label="Message on WhatsApp">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.16-.17.2-.35.22-.64.08-.3-.15-1.26-.47-2.4-1.48-.88-.79-1.48-1.76-1.65-2.06-.17-.3-.02-.46.13-.6.14-.14.3-.35.45-.53.15-.17.2-.3.3-.5.1-.2.05-.37-.03-.52-.07-.15-.67-1.61-.91-2.21-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.8.37-.27.3-1.03 1.02-1.03 2.48s1.06 2.88 1.21 3.07c.15.2 2.1 3.2 5.08 4.49.71.3 1.26.49 1.69.62.71.23 1.36.2 1.87.12.57-.09 1.76-.72 2-1.41.25-.7.25-1.29.18-1.42-.08-.12-.28-.2-.57-.34m-5.42 7.4h-.01a9.87 9.87 0 01-5.03-1.38l-.36-.21-3.74.98 1-3.65-.24-.37a9.86 9.86 0 01-1.51-5.26c0-5.45 4.44-9.89 9.89-9.89 2.64 0 5.12 1.03 6.99 2.9a9.83 9.83 0 012.89 6.99c0 5.45-4.43 9.89-9.88 9.89m8.41-18.3A11.82 11.82 0 0012.05 0C5.5 0 .16 5.34.16 11.89c0 2.1.55 4.14 1.59 5.95L.06 24l6.3-1.65a11.88 11.88 0 005.69 1.45h.005c6.55 0 11.89-5.34 11.89-11.89a11.82 11.82 0 00-3.48-8.41z" />
+                </svg>
+              </a>
+              <button class="act act-del" (click)="remove(lead)" title="Delete" aria-label="Delete enquiry">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 6h18M8 6V4h8v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </article>
+      }
+    </div>
+  } @else {
+    <div class="empty card">
+      <span class="empty-ico" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 12h5l2 3h4l2-3h5" /><path d="M5 5h14l2 7v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5z" />
+        </svg>
+      </span>
+      <h2 class="empty-title">
+        @if (search || statusFilter) { No leads match this filter }
+        @else { No enquiries yet }
+      </h2>
+      <p class="empty-body">
+        @if (search || statusFilter) { Try clearing the search or status filter. }
+        @else { Enquiries from the storefront contact forms will land here. }
+      </p>
+      @if (search || statusFilter) {
+        <button class="btn btn-primary" (click)="search = ''; setFilter('')">Clear filters</button>
+      }
+    </div>
+  }
+</div>
+
+<!-- ═══════════════ DETAIL DRAWER ═══════════════ -->
+@if (selected(); as lead) {
+  <div class="drawer-backdrop" (click)="close()"></div>
+  <aside class="drawer" role="dialog" aria-label="Lead details">
+    <header class="dr-head">
+      <div>
+        <h2 class="dr-name">{{ lead.name }}</h2>
+        <span class="badge badge-{{ lead.status }}">{{ humanize(lead.status) }}</span>
+      </div>
+      <button class="dr-close" (click)="close()" aria-label="Close">✕</button>
+    </header>
+
+    <div class="dr-body">
+      <section class="dr-section">
+        <h3 class="dr-label">Contact</h3>
+        <dl class="dr-list">
+          <div><dt>Phone</dt><dd><a [href]="telLink(lead.phone)">{{ lead.phone }}</a></dd></div>
+          @if (lead.email) {
+            <div><dt>Email</dt><dd><a [href]="'mailto:' + lead.email">{{ lead.email }}</a></dd></div>
+          }
+          <div><dt>Received</dt><dd>{{ formatDate(lead.createdAt) }} ({{ timeAgo(lead.createdAt) }})</dd></div>
+          <div><dt>Type</dt><dd>{{ humanize(lead.type) }}</dd></div>
+          @if (lead.preferredDate) {
+            <div><dt>Preferred date</dt><dd>{{ formatDate(lead.preferredDate) }}</dd></div>
+          }
+          @if (lead.budget) {
+            <div><dt>Budget</dt><dd>{{ fmtPrice(lead.budget) }}</dd></div>
+          }
+          @if (lead.tradeInVehicle) {
+            <div><dt>Trade-in</dt><dd>{{ lead.tradeInVehicle }}</dd></div>
+          }
+        </dl>
+      </section>
+
+      @if (lead.car) {
+        <section class="dr-section">
+          <h3 class="dr-label">Interested in</h3>
+          <a [routerLink]="['/admin/cars', lead.car.id]" class="dr-car card">
+            <span class="dr-car-name">{{ carTitle(lead.car) }}</span>
+            <span class="dr-car-price">{{ fmtPrice(lead.car.price) }}</span>
+          </a>
+        </section>
+      }
+
+      @if (lead.message) {
+        <section class="dr-section">
+          <h3 class="dr-label">Message</h3>
+          <p class="dr-message">{{ lead.message }}</p>
+        </section>
+      }
+
+      <section class="dr-section">
+        <h3 class="dr-label">Move to</h3>
+        <div class="dr-stages">
+          @for (s of statuses; track s) {
+            <button
+              class="pill"
+              [class.active]="lead.status === s"
+              (click)="setStatus(lead, s)"
+            >{{ humanize(s) }}</button>
+          }
+        </div>
+      </section>
+
+      <section class="dr-section">
+        <h3 class="dr-label">Internal notes</h3>
+        <textarea
+          class="input"
+          [(ngModel)]="noteDraft"
+          rows="5"
+          placeholder="Call outcome, agreed price, next follow-up date…"
+        ></textarea>
+        <button class="btn btn-primary btn-sm dr-save" (click)="saveNotes()" [disabled]="savingNotes()">
+          @if (savingNotes()) { <span class="spinner"></span> Saving… }
+          @else { Save notes }
+        </button>
+      </section>
+    </div>
+
+    <footer class="dr-foot">
+      <a [href]="telLink(lead.phone)" class="btn btn-ghost btn-sm">Call</a>
+      <a [href]="waLink(lead)" target="_blank" rel="noopener noreferrer" class="btn btn-wa btn-sm">WhatsApp</a>
+      <button class="btn btn-danger btn-sm" (click)="remove(lead)">Delete</button>
+    </footer>
+  </aside>
+}

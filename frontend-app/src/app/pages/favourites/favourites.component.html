@@ -1,0 +1,49 @@
+<app-public-nav />
+
+<main class="fav">
+  <header class="fav-hero">
+    <div class="aurora" aria-hidden="true"></div>
+    <div class="wrap wrap-wide fav-hero-inner">
+      <span class="eyebrow">Your shortlist</span>
+      <h1 class="t-h1 fav-title">Saved vehicles</h1>
+      <p class="t-lead fav-sub">
+        @if (cars().length) {
+          {{ cars().length }} vehicle{{ cars().length === 1 ? '' : 's' }} saved to this browser.
+        } @else {
+          Tap the heart on any listing to keep it here.
+        }
+      </p>
+    </div>
+  </header>
+
+  <div class="wrap wrap-wide fav-body">
+    @if (loading()) {
+      <div class="car-grid">
+        @for (s of [0,1,2]; track s) { <div class="skeleton skel-card"></div> }
+      </div>
+    } @else if (cars().length) {
+      <div class="fav-bar">
+        <button class="btn btn-ghost btn-sm" (click)="clearAll()">Clear all saved</button>
+        <a routerLink="/compare" class="btn btn-outline btn-sm">Compare vehicles</a>
+      </div>
+      <div class="car-grid">
+        @for (car of cars(); track car.id; let i = $index) {
+          <app-car-card [car]="car" [index]="i" />
+        }
+      </div>
+    } @else {
+      <div class="empty card">
+        <span class="empty-ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1L12 21l7.7-7.6 1.1-1a5.5 5.5 0 0 0 0-7.8z" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </span>
+        <h2 class="empty-title">Nothing saved yet</h2>
+        <p class="empty-body">Browse the inventory and tap the heart on anything you like.</p>
+        <a routerLink="/inventory" class="btn btn-primary">Browse inventory</a>
+      </div>
+    }
+  </div>
+</main>
+
+<app-public-footer />

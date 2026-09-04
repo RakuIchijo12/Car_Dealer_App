@@ -1,0 +1,240 @@
+<app-public-nav />
+
+<main class="sell">
+
+  <header class="sell-hero">
+    <div class="aurora" aria-hidden="true"></div>
+    <div class="grid-lines" aria-hidden="true"></div>
+    <div class="wrap wrap-wide sell-hero-inner">
+      <div class="sell-hero-copy">
+        <span class="eyebrow">Sell or trade in</span>
+        <h1 class="t-display sell-title">
+          Get a real price<br /><span class="t-grad">for your car.</span>
+        </h1>
+        <p class="t-lead sell-sub">
+          Free appraisal, no obligation. We benchmark against live market listings —
+          not lowball trade-in books — and pay the same day you accept.
+        </p>
+        <div class="sell-hero-actions">
+          <a href="#appraisal" class="btn btn-primary btn-lg">Get a free appraisal</a>
+          <a [href]="whatsapp" target="_blank" rel="noopener noreferrer" class="btn btn-ghost btn-lg">
+            Ask on WhatsApp
+          </a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── Why sell to us ── -->
+  <section class="section why">
+    <div class="wrap wrap-wide">
+      <div class="why-grid">
+        @for (r of reasons; track r.title; let i = $index) {
+          <article class="why-card card card-hover" [appReveal]="i * 70">
+            <span class="why-num" aria-hidden="true">{{ i + 1 }}</span>
+            <h2 class="why-title">{{ r.title }}</h2>
+            <p class="why-body">{{ r.body }}</p>
+          </article>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- ── How it works ── -->
+  <section class="section steps-section">
+    <div class="wrap wrap-wide">
+      <div class="sec-head" appReveal>
+        <span class="eyebrow">The process</span>
+        <h2 class="t-h2 sec-title">Four steps, usually under a week</h2>
+      </div>
+      <ol class="steps">
+        @for (s of steps; track s.n; let i = $index) {
+          <li class="step" [appReveal]="i * 80">
+            <span class="step-n">{{ s.n }}</span>
+            <h3 class="step-title">{{ s.title }}</h3>
+            <p class="step-body">{{ s.body }}</p>
+          </li>
+        }
+      </ol>
+    </div>
+  </section>
+
+  <!-- ── Appraisal form ── -->
+  <section class="section form-section" id="appraisal">
+    <div class="wrap form-wrap">
+      <div class="form-card card">
+        @if (submitted()) {
+          <div class="sent">
+            <span class="sent-ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <path d="M5 13l4 4 10-11" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </span>
+            <h2 class="sent-title">Appraisal request received</h2>
+            <p class="sent-body">
+              Thanks! We'll review the details and come back with an indicative range —
+              usually the same business day. Keep your phone handy.
+            </p>
+            <div class="sent-actions">
+              <button class="btn btn-ghost" (click)="reset()">Submit another vehicle</button>
+              <a [href]="whatsapp" target="_blank" rel="noopener noreferrer" class="btn btn-wa">
+                Send photos on WhatsApp
+              </a>
+            </div>
+          </div>
+        } @else {
+          <div class="form-head">
+            <h2 class="t-h2 form-title">Free vehicle appraisal</h2>
+            <p class="form-sub">Takes about a minute. No obligation to sell.</p>
+          </div>
+
+          <form [formGroup]="form" (ngSubmit)="submit()" class="form">
+
+            <fieldset class="fs">
+              <legend class="fs-legend">Your vehicle</legend>
+              <div class="form-row-3">
+                <div class="field">
+                  <label class="label" for="s-year">Year *</label>
+                  <input
+                    id="s-year"
+                    class="input"
+                    [class.invalid]="invalid('vehicleYear')"
+                    formControlName="vehicleYear"
+                    type="number"
+                    [min]="1980"
+                    [max]="currentYear"
+                    placeholder="2018"
+                  />
+                  @if (invalid('vehicleYear')) { <span class="field-error">Required</span> }
+                </div>
+                <div class="field">
+                  <label class="label" for="s-make">Make *</label>
+                  <input
+                    id="s-make"
+                    class="input"
+                    [class.invalid]="invalid('vehicleMake')"
+                    formControlName="vehicleMake"
+                    placeholder="Toyota"
+                  />
+                  @if (invalid('vehicleMake')) { <span class="field-error">Required</span> }
+                </div>
+                <div class="field">
+                  <label class="label" for="s-model">Model *</label>
+                  <input
+                    id="s-model"
+                    class="input"
+                    [class.invalid]="invalid('vehicleModel')"
+                    formControlName="vehicleModel"
+                    placeholder="Vios"
+                  />
+                  @if (invalid('vehicleModel')) { <span class="field-error">Required</span> }
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="field">
+                  <label class="label" for="s-mileage">Mileage (km)</label>
+                  <input
+                    id="s-mileage"
+                    class="input"
+                    formControlName="mileage"
+                    type="number"
+                    placeholder="65000"
+                  />
+                </div>
+                <div class="field">
+                  <label class="label" for="s-cond">Condition</label>
+                  <select id="s-cond" class="input" formControlName="condition">
+                    @for (c of conditions; track c.value) {
+                      <option [value]="c.value">{{ c.label }}</option>
+                    }
+                  </select>
+                </div>
+              </div>
+
+              <div class="field">
+                <label class="label" for="s-price">
+                  Your asking price <span class="opt">(optional, ₱)</span>
+                </label>
+                <input
+                  id="s-price"
+                  class="input"
+                  formControlName="expectedPrice"
+                  type="number"
+                  placeholder="550000"
+                />
+              </div>
+            </fieldset>
+
+            <fieldset class="fs">
+              <legend class="fs-legend">How we reach you</legend>
+              <div class="form-row">
+                <div class="field">
+                  <label class="label" for="s-name">Your name *</label>
+                  <input
+                    id="s-name"
+                    class="input"
+                    [class.invalid]="invalid('name')"
+                    formControlName="name"
+                    placeholder="Juan Dela Cruz"
+                    autocomplete="name"
+                  />
+                  @if (invalid('name')) { <span class="field-error">Please enter your name</span> }
+                </div>
+                <div class="field">
+                  <label class="label" for="s-phone">Mobile number *</label>
+                  <input
+                    id="s-phone"
+                    class="input"
+                    [class.invalid]="invalid('phone')"
+                    formControlName="phone"
+                    placeholder="0917 123 4567"
+                    autocomplete="tel"
+                    inputmode="tel"
+                  />
+                  @if (invalid('phone')) { <span class="field-error">A contact number is required</span> }
+                </div>
+              </div>
+
+              <div class="field">
+                <label class="label" for="s-email">Email <span class="opt">(optional)</span></label>
+                <input
+                  id="s-email"
+                  class="input"
+                  [class.invalid]="invalid('email')"
+                  formControlName="email"
+                  type="email"
+                  placeholder="you@email.com"
+                  autocomplete="email"
+                />
+                @if (invalid('email')) { <span class="field-error">Check the email address</span> }
+              </div>
+
+              <div class="field">
+                <label class="label" for="s-msg">Anything else we should know?</label>
+                <textarea
+                  id="s-msg"
+                  class="input"
+                  formControlName="message"
+                  rows="3"
+                  placeholder="Service history, accident record, aftermarket parts, remaining loan balance…"
+                ></textarea>
+              </div>
+            </fieldset>
+
+            <button type="submit" class="btn btn-primary btn-lg btn-block" [disabled]="submitting()">
+              @if (submitting()) { <span class="spinner"></span> Sending… }
+              @else { Get my free appraisal }
+            </button>
+
+            <p class="form-legal">
+              We only use these details to appraise your vehicle and contact you about it.
+            </p>
+          </form>
+        }
+      </div>
+    </div>
+  </section>
+</main>
+
+<app-public-footer />

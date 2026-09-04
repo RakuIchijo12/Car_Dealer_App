@@ -1,0 +1,348 @@
+<app-public-nav />
+
+<main class="home">
+
+  <!-- ═══════════════ HERO ═══════════════ -->
+  <section class="hero">
+    <div class="aurora" aria-hidden="true"></div>
+    <div class="grid-lines" aria-hidden="true"></div>
+
+    <div class="wrap wrap-wide hero-inner">
+      <div class="hero-copy">
+        <span class="hero-badge rise">
+          <span class="live-dot" aria-hidden="true"></span>
+          @if (stats(); as s) {
+            {{ s.available }} vehicles ready to drive today
+          } @else {
+            Now serving {{ brand.contact.city }}
+          }
+        </span>
+
+        <h1 class="hero-title t-display">
+          Find the car<br />
+          <span class="t-grad">you actually want.</span>
+        </h1>
+
+        <p class="hero-sub t-lead">
+          Hand-picked, fully inspected pre-owned vehicles in {{ brand.contact.city }}.
+          Complete papers, fixed honest pricing, and financing sorted in 24 hours.
+        </p>
+
+        <!-- Quick search -->
+        <form class="hero-search glass" (ngSubmit)="search()">
+          <div class="hs-field hs-grow">
+            <svg viewBox="0 0 20 20" fill="currentColor" class="hs-ico" aria-hidden="true">
+              <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+            </svg>
+            <input
+              [(ngModel)]="quickSearch"
+              name="q"
+              class="hs-input"
+              placeholder="Search make or model…"
+              aria-label="Search make or model"
+            />
+          </div>
+
+          <div class="hs-divider" aria-hidden="true"></div>
+
+          <div class="hs-field">
+            <select [(ngModel)]="quickBodyType" name="body" class="hs-select" aria-label="Body type">
+              <option value="">Any body type</option>
+              @for (bt of bodyTypes; track bt.value) {
+                <option [value]="bt.value">{{ bt.label }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="hs-divider" aria-hidden="true"></div>
+
+          <div class="hs-field">
+            <select [(ngModel)]="quickMake" name="make" class="hs-select" aria-label="Brand">
+              <option value="">Any brand</option>
+              @for (m of makes(); track m.id) {
+                <option [value]="m.id">{{ m.name }}</option>
+              }
+            </select>
+          </div>
+
+          <button type="submit" class="btn btn-primary hs-btn">
+            Search
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+              <path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </button>
+        </form>
+
+        <div class="hero-trust">
+          <span>Trusted by buyers across Davao Region since {{ brand.founded }}</span>
+        </div>
+      </div>
+
+      <!-- Stat rail -->
+      @if (stats(); as s) {
+        <div class="hero-stats">
+          <div class="hstat">
+            <span class="hstat-n">{{ s.available }}</span>
+            <span class="hstat-l">Units available</span>
+          </div>
+          <div class="hstat">
+            <span class="hstat-n">{{ s.makes }}</span>
+            <span class="hstat-l">Trusted brands</span>
+          </div>
+          <div class="hstat">
+            <span class="hstat-n">{{ s.sold }}+</span>
+            <span class="hstat-l">Happy owners</span>
+          </div>
+          <div class="hstat">
+            <span class="hstat-n">100%</span>
+            <span class="hstat-l">Inspected units</span>
+          </div>
+        </div>
+      }
+    </div>
+
+    <div class="hero-fade" aria-hidden="true"></div>
+  </section>
+
+  <!-- ═══════════════ BROWSE BY BODY TYPE ═══════════════ -->
+  <section class="section bt-section">
+    <div class="wrap wrap-wide">
+      <div class="sec-head" appReveal>
+        <div>
+          <span class="eyebrow">Shop by shape</span>
+          <h2 class="t-h2 sec-title">What are you looking for?</h2>
+        </div>
+        <a routerLink="/inventory" class="btn btn-ghost btn-sm sec-link">
+          View all inventory
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+            <path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </a>
+      </div>
+
+      <div class="bt-grid">
+        @for (bt of bodyTypes; track bt.value; let i = $index) {
+          <a
+            routerLink="/inventory"
+            [queryParams]="{ bodyType: bt.value }"
+            class="bt-card card card-hover"
+            [appReveal]="i * 60"
+          >
+            <span class="bt-art" aria-hidden="true">
+              <svg viewBox="0 0 64 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round">
+                @switch (bt.value) {
+                  @case ('suv') {
+                    <path d="M6 24V14l6-7h24l8 7h6a2 2 0 012 2v8" />
+                    <path d="M4 24h56" stroke-linecap="round" />
+                    <path d="M14 7v7M28 7v7" />
+                  }
+                  @case ('pickup') {
+                    <path d="M4 24V15l5-7h16v7h10l6 6v3" />
+                    <path d="M2 24h60" stroke-linecap="round" />
+                    <path d="M25 15h10" />
+                  }
+                  @case ('mpv') {
+                    <path d="M6 24V13l7-6h28l8 6v11" />
+                    <path d="M4 24h56" stroke-linecap="round" />
+                    <path d="M16 7v6M30 7v6M42 7v6" />
+                  }
+                  @case ('hatchback') {
+                    <path d="M8 24v-8l7-8h20l10 8v8" />
+                    <path d="M6 24h52" stroke-linecap="round" />
+                    <path d="M20 8v8" />
+                  }
+                  @case ('crossover') {
+                    <path d="M6 24v-9l8-7h22l10 7h4a2 2 0 012 2v7" />
+                    <path d="M4 24h58" stroke-linecap="round" />
+                    <path d="M18 8v7" />
+                  }
+                  @default {
+                    <path d="M6 24v-7l9-8h20l11 8h6v7" />
+                    <path d="M4 24h58" stroke-linecap="round" />
+                    <path d="M20 9v8" />
+                  }
+                }
+                <circle cx="18" cy="24" r="4" fill="none" />
+                <circle cx="46" cy="24" r="4" fill="none" />
+              </svg>
+            </span>
+            <span class="bt-label">{{ bt.label }}</span>
+          </a>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ FEATURED INVENTORY ═══════════════ -->
+  <section class="section feat-section">
+    <div class="wrap wrap-wide">
+      <div class="sec-head" appReveal>
+        <div>
+          <span class="eyebrow">Fresh on the lot</span>
+          <h2 class="t-h2 sec-title">Featured vehicles</h2>
+          <p class="t-lead sec-sub">Newly inspected units, ready for viewing this week.</p>
+        </div>
+        <a routerLink="/inventory" class="btn btn-ghost btn-sm sec-link">
+          See all {{ stats()?.available ?? '' }} units
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+            <path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </a>
+      </div>
+
+      @if (loading()) {
+        <div class="car-grid">
+          @for (s of skeletons; track s) {
+            <div class="skeleton skel-card"></div>
+          }
+        </div>
+      } @else if (featured().length) {
+        <div class="car-grid">
+          @for (car of featured(); track car.id; let i = $index) {
+            <div [appReveal]="i * 70">
+              <app-car-card [car]="car" [index]="i" />
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="empty card">
+          <p>No vehicles listed yet. Please check back shortly.</p>
+        </div>
+      }
+    </div>
+  </section>
+
+  <!-- ═══════════════ BRANDS ═══════════════ -->
+  @if (makes().length) {
+    <section class="brands-section">
+      <div class="wrap wrap-wide">
+        <div class="brands-head" appReveal>
+          <span class="eyebrow">Brands we stock</span>
+        </div>
+        <div class="brand-row" appReveal>
+          @for (m of makes(); track m.id) {
+            <a routerLink="/inventory" [queryParams]="{ makeId: m.id }" class="brand-chip">
+              <span class="brand-name">{{ m.name }}</span>
+              <span class="brand-count">{{ m.carCount }}</span>
+            </a>
+          }
+        </div>
+      </div>
+    </section>
+  }
+
+  <!-- ═══════════════ WHY US ═══════════════ -->
+  <section class="section why-section">
+    <div class="aurora" aria-hidden="true"></div>
+    <div class="wrap wrap-wide why-inner">
+      <div class="why-copy" appReveal>
+        <span class="eyebrow">Why {{ brand.name }}</span>
+        <h2 class="t-h1 why-title">
+          Buying pre-owned<br />shouldn't feel like<br /><span class="t-grad">a gamble.</span>
+        </h2>
+        <p class="t-lead why-sub">
+          We built {{ brand.name }} around the part of the process everyone dreads — the
+          uncertainty. Every unit is inspected, documented and priced in the open,
+          so the only thing left to decide is which one you like.
+        </p>
+        <a routerLink="/about" class="btn btn-outline">
+          Our inspection process
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+            <path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </a>
+      </div>
+
+      <div class="why-grid">
+        @for (p of promises; track p.title; let i = $index) {
+          <article class="why-card card card-hover" [appReveal]="i * 80">
+            <span class="why-ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                @switch (p.icon) {
+                  @case ('shield') { <path d="M12 3l7.5 3v5.5c0 4.6-3.1 8.4-7.5 9.5-4.4-1.1-7.5-4.9-7.5-9.5V6L12 3z" /><path d="M9 12l2 2 4-4" /> }
+                  @case ('doc') { <path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8l-5-5z" /><path d="M14 3v5h5M9 13h6M9 17h4" /> }
+                  @case ('tag') { <path d="M20.6 13.4l-7.2 7.2a2 2 0 01-2.8 0l-7-7A2 2 0 013 12.2V5a2 2 0 012-2h7.2a2 2 0 011.4.6l7 7a2 2 0 010 2.8z" /><circle cx="8.5" cy="8.5" r="1.4" /> }
+                  @default { <path d="M3 10l9-6 9 6" /><path d="M5 10v9M12 10v9M19 10v9M3 20h18" /> }
+                }
+              </svg>
+            </span>
+            <h3 class="why-card-title">{{ p.title }}</h3>
+            <p class="why-card-body">{{ p.body }}</p>
+          </article>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ HOW IT WORKS ═══════════════ -->
+  <section class="section steps-section">
+    <div class="wrap wrap-wide">
+      <div class="steps-head" appReveal>
+        <span class="eyebrow">How it works</span>
+        <h2 class="t-h2 sec-title">From browsing to plates in four steps</h2>
+      </div>
+
+      <ol class="steps">
+        @for (s of steps; track s.n; let i = $index) {
+          <li class="step" [appReveal]="i * 90">
+            <span class="step-n">{{ s.n }}</span>
+            <h3 class="step-title">{{ s.title }}</h3>
+            <p class="step-body">{{ s.body }}</p>
+          </li>
+        }
+      </ol>
+    </div>
+  </section>
+
+  <!-- ═══════════════ TESTIMONIALS ═══════════════ -->
+  <section class="section quotes-section">
+    <div class="wrap wrap-wide">
+      <div class="steps-head" appReveal>
+        <span class="eyebrow">From our buyers</span>
+        <h2 class="t-h2 sec-title">Real handovers, real people</h2>
+      </div>
+
+      <div class="quotes">
+        @for (t of testimonials; track t.name; let i = $index) {
+          <figure class="quote card" [appReveal]="i * 90">
+            <span class="quote-mark" aria-hidden="true">"</span>
+            <blockquote class="quote-text">{{ t.quote }}</blockquote>
+            <figcaption class="quote-by">
+              <span class="quote-avatar" aria-hidden="true">{{ t.name.charAt(0) }}</span>
+              <span>
+                <span class="quote-name">{{ t.name }}</span>
+                <span class="quote-detail">{{ t.detail }}</span>
+              </span>
+            </figcaption>
+          </figure>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ CTA ═══════════════ -->
+  <section class="cta-section">
+    <div class="wrap wrap-wide">
+      <div class="cta card" appReveal>
+        <div class="aurora" aria-hidden="true"></div>
+        <div class="cta-body">
+          <h2 class="t-h1 cta-title">Ready to see it in person?</h2>
+          <p class="t-lead cta-sub">
+            Book a viewing and we'll have the unit washed, warmed up and waiting.
+            Or message us — we reply within the hour during business hours.
+          </p>
+          <div class="cta-actions">
+            <a routerLink="/inventory" class="btn btn-primary btn-lg">Browse inventory</a>
+            <a routerLink="/contact" class="btn btn-ghost btn-lg">Book a viewing</a>
+          </div>
+          <p class="cta-note">
+            {{ brand.contact.address }}, {{ brand.contact.city }} · {{ brand.contact.hours }}
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<app-public-footer />

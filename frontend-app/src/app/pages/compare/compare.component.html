@@ -1,0 +1,100 @@
+<app-public-nav />
+
+<main class="cmp">
+  <header class="cmp-hero">
+    <div class="aurora" aria-hidden="true"></div>
+    <div class="wrap wrap-wide cmp-hero-inner">
+      <span class="eyebrow">Side by side</span>
+      <h1 class="t-h1 cmp-title">Compare vehicles</h1>
+      <p class="t-lead cmp-sub">
+        Up to three at a time. The strongest value in each row is highlighted.
+      </p>
+    </div>
+  </header>
+
+  <div class="wrap wrap-wide cmp-body">
+    @if (loading()) {
+      <div class="skeleton sk-table"></div>
+    } @else if (cars().length) {
+
+      <div class="cmp-bar">
+        <button class="btn btn-ghost btn-sm" (click)="clearAll()">Clear comparison</button>
+        <a routerLink="/inventory" class="btn btn-outline btn-sm">Add another vehicle</a>
+      </div>
+
+      <div class="cmp-scroll">
+        <table class="cmp-table">
+          <thead>
+            <tr>
+              <th class="cmp-corner"><span class="sr-only">Specification</span></th>
+              @for (car of cars(); track car.id) {
+                <th class="cmp-col">
+                  <div class="cmp-card">
+                    <button
+                      class="cmp-remove"
+                      (click)="remove(car.id)"
+                      [attr.aria-label]="'Remove ' + carTitle(car)"
+                    >✕</button>
+                    <a [routerLink]="['/vehicle', car.id]" class="cmp-thumb">
+                      <img [src]="photoUrl(car.photo)" [alt]="carTitle(car)" (error)="onImgError($event)" />
+                    </a>
+                    <a [routerLink]="['/vehicle', car.id]" class="cmp-name">
+                      <span class="cmp-make">{{ car.make?.name }}</span>
+                      <span class="cmp-model">{{ car.model }}</span>
+                    </a>
+                    <span class="cmp-price">{{ fmtPrice(car.price) }}</span>
+                    <a [routerLink]="['/vehicle', car.id]" class="btn btn-primary btn-sm btn-block">View details</a>
+                  </div>
+                </th>
+              }
+              @for (slot of emptySlots(); track $index) {
+                <th class="cmp-col">
+                  <a routerLink="/inventory" class="cmp-add">
+                    <span class="cmp-add-plus" aria-hidden="true">+</span>
+                    <span>Add a vehicle</span>
+                  </a>
+                </th>
+              }
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of rows(); track row.label) {
+              <tr>
+                <th scope="row" class="cmp-rowlabel">{{ row.label }}</th>
+                @for (v of row.values; track $index) {
+                  <td class="cmp-cell" [class.best]="row.best === $index">
+                    {{ v }}
+                    @if (row.best === $index) {
+                      <span class="cmp-best" aria-label="Best value">
+                        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.5">
+                          <path d="M4 10.5l4 4 8-9" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                      </span>
+                    }
+                  </td>
+                }
+                @for (slot of emptySlots(); track $index) {
+                  <td class="cmp-cell cmp-empty">—</td>
+                }
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+    } @else {
+      <div class="empty card">
+        <span class="empty-ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M9 3v18M15 3v18M3 9h18M3 15h18" stroke-linecap="round" />
+          </svg>
+        </span>
+        <h2 class="empty-title">Nothing to compare yet</h2>
+        <p class="empty-body">Add up to three vehicles from the inventory to see them side by side.</p>
+        <a routerLink="/inventory" class="btn btn-primary">Browse inventory</a>
+      </div>
+    }
+  </div>
+</main>
+
+<app-public-footer />

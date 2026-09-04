@@ -1,0 +1,106 @@
+<a [routerLink]="['/vehicle', car.id]" class="cc card card-hover" [attr.aria-label]="title">
+
+  <div class="cc-media">
+    <img
+      [src]="image"
+      [alt]="title"
+      class="cc-img"
+      [class.loaded]="imgLoaded()"
+      loading="lazy"
+      decoding="async"
+      (load)="imgLoaded.set(true)"
+      (error)="onImgError($event); imgLoaded.set(true)"
+    />
+    @if (!imgLoaded()) { <div class="cc-img-skeleton skeleton"></div> }
+
+    <div class="cc-shade"></div>
+
+    <!-- Top-left flags -->
+    <div class="cc-flags">
+      @if (car.featured) { <span class="badge badge-featured">Featured</span> }
+      @if (discountPct) { <span class="badge cc-sale">−{{ discountPct }}%</span> }
+      @if (car.status !== 'available') {
+        <span class="badge badge-{{ car.status }}">{{ car.status }}</span>
+      }
+    </div>
+
+    <!-- Top-right quick actions -->
+    <div class="cc-actions">
+      <button
+        type="button"
+        class="cc-act"
+        [class.on]="isFavourite"
+        (click)="toggleFavourite($event)"
+        [attr.aria-label]="isFavourite ? 'Remove from saved' : 'Save this vehicle'"
+        [attr.aria-pressed]="isFavourite"
+      >
+        <svg viewBox="0 0 24 24" [attr.fill]="isFavourite ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="1.9">
+          <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1L12 21l7.7-7.6 1.1-1a5.5 5.5 0 0 0 0-7.8z" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </button>
+
+      <button
+        type="button"
+        class="cc-act"
+        [class.on]="isComparing"
+        (click)="toggleCompare($event)"
+        [attr.aria-label]="isComparing ? 'Remove from compare' : 'Add to compare'"
+        [attr.aria-pressed]="isComparing"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9">
+          <path d="M9 3v18M15 3v18M3 9h18M3 15h18" stroke-linecap="round" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Year chip sits on the image bottom-left -->
+    <span class="cc-year">{{ car.year }}</span>
+  </div>
+
+  <div class="cc-body">
+    <span class="cc-make">{{ car.make?.name }}</span>
+    <h3 class="cc-model">{{ car.model }}</h3>
+
+    <ul class="cc-specs">
+      @if (car.transmission) {
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+            <path d="M6 4v16M12 4v16M18 4v8M6 12h12" stroke-linecap="round" />
+            <circle cx="6" cy="4" r="1.6" /><circle cx="12" cy="4" r="1.6" /><circle cx="18" cy="4" r="1.6" />
+          </svg>
+          {{ humanize(car.transmission) }}
+        </li>
+      }
+      @if (car.fuelType) {
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+            <path d="M4 20V5a2 2 0 012-2h6a2 2 0 012 2v15M3 20h12" stroke-linecap="round" />
+            <path d="M14 9h3a2 2 0 012 2v5a1.5 1.5 0 003 0v-6l-2.5-3" stroke-linecap="round" />
+          </svg>
+          {{ humanize(car.fuelType) }}
+        </li>
+      }
+      <li>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+          <circle cx="12" cy="12" r="9" />
+          <path d="M12 7v5l3 2" stroke-linecap="round" />
+        </svg>
+        {{ fmtMileage(car.mileage) }}
+      </li>
+    </ul>
+
+    <div class="cc-foot">
+      <div class="cc-prices">
+        @if (car.originalPrice && discountPct) {
+          <span class="cc-was">{{ fmtPrice(car.originalPrice) }}</span>
+        }
+        <span class="cc-price">{{ fmtPrice(car.price) }}</span>
+      </div>
+      <span class="cc-arrow" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </span>
+    </div>
+  </div>
+</a>

@@ -1,0 +1,37 @@
+.fav-hero {
+  position: relative;
+  overflow: hidden;
+  padding-top: clamp(6.5rem, 12vh, 8.5rem);
+  padding-bottom: clamp(2rem, 4vw, 3rem);
+  border-bottom: 1px solid var(--hairline);
+}
+.fav-hero .aurora::after { display: none; }
+.fav-hero-inner { position: relative; z-index: 1; }
+.fav-title { margin-top: 0.9rem; }
+.fav-sub { margin: 0.9rem 0 0; max-width: 50ch; }
+
+.fav-body { padding-block: 2.25rem 5rem; }
+
+.fav-bar { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 1.75rem; }
+
+.car-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  gap: 1.3rem;
+}
+.skel-card { aspect-ratio: 4 / 3.35; border-radius: var(--r-lg); }
+
+.empty { padding: 4.5rem 2rem; text-align: center; }
+.empty-ico {
+  display: grid;
+  place-items: center;
+  width: 60px;
+  height: 60px;
+  margin: 0 auto 1.35rem;
+  border-radius: 50%;
+  border: 1px solid var(--hairline-2);
+  color: var(--text-3);
+}
+.empty-ico svg { width: 26px; height: 26px; }
+.empty-title { font-family: 'Sora', sans-serif; font-size: 1.2rem; font-weight: 700; }
+.empty-body { margin: 0.6rem 0 1.75rem; color: var(--text-2); font-size: 0.9rem; }

@@ -1,0 +1,334 @@
+<app-public-nav />
+
+<main class="inv">
+
+  <!-- ═══════════════ HEADER ═══════════════ -->
+  <header class="inv-hero">
+    <div class="aurora" aria-hidden="true"></div>
+    <div class="wrap wrap-wide inv-hero-inner">
+      <span class="eyebrow">{{ total() }} vehicles listed</span>
+      <h1 class="t-h1 inv-title">Browse our inventory</h1>
+      <p class="t-lead inv-sub">
+        Every unit inspected, documented and priced in the open.
+        Filter down to exactly what you need.
+      </p>
+    </div>
+  </header>
+
+  <div class="wrap wrap-wide inv-body">
+
+    <!-- ═══════════════ FILTER SIDEBAR ═══════════════ -->
+    <aside class="filters" [class.open]="filtersOpen()">
+      <div class="filters-inner glass">
+
+        <div class="f-head">
+          <span class="f-title">
+            Filters
+            @if (activeFilterCount) { <span class="f-count">{{ activeFilterCount }}</span> }
+          </span>
+          @if (activeFilterCount) {
+            <button class="f-reset" (click)="reset()">Clear all</button>
+          }
+          <button class="f-close" (click)="filtersOpen.set(false)" aria-label="Close filters">✕</button>
+        </div>
+
+        <!-- Search -->
+        <div class="f-group">
+          <label class="label" for="inv-search">Search</label>
+          <div class="f-search">
+            <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+              <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+            </svg>
+            <input
+              id="inv-search"
+              class="input f-search-input"
+              [ngModel]="filters.search"
+              (ngModelChange)="onSearchInput($event)"
+              placeholder="Make, model or keyword"
+            />
+          </div>
+        </div>
+
+        <!-- Brand -->
+        <div class="f-group">
+          <span class="label">Brand</span>
+          <div class="f-pills">
+            <button class="pill" [class.active]="!filters.makeId" (click)="setMake('')">All</button>
+            @for (m of makes(); track m.id) {
+              <button
+                class="pill"
+                [class.active]="+filters.makeId! === m.id"
+                (click)="setMake(m.id)"
+              >{{ m.name }} <span class="pill-n">{{ m.carCount }}</span></button>
+            }
+          </div>
+        </div>
+
+        <!-- Body type -->
+        <div class="f-group">
+          <span class="label">Body type</span>
+          <div class="f-pills">
+            @for (bt of bodyTypes; track bt) {
+              <button
+                class="pill"
+                [class.active]="filters.bodyType === bt"
+                (click)="toggleBodyType(bt)"
+              >{{ humanize(bt) }}</button>
+            }
+          </div>
+        </div>
+
+        <!-- Price -->
+        <div class="f-group">
+          <span class="label">Price range (₱)</span>
+          <div class="f-row">
+            <input
+              type="number"
+              class="input"
+              placeholder="Min"
+              [ngModel]="filters.priceMin"
+              (ngModelChange)="apply({ priceMin: $event })"
+            />
+            <span class="f-dash">–</span>
+            <input
+              type="number"
+              class="input"
+              placeholder="Max"
+              [ngModel]="filters.priceMax"
+              (ngModelChange)="apply({ priceMax: $event })"
+            />
+          </div>
+          @if (facets(); as f) {
+            <p class="f-hint">Inventory spans {{ fmtShort(f.minPrice) }} – {{ fmtShort(f.maxPrice) }}</p>
+          }
+        </div>
+
+        <!-- Year -->
+        <div class="f-group">
+          <span class="label">Year</span>
+          <div class="f-row">
+            <input
+              type="number"
+              class="input"
+              placeholder="From"
+              [ngModel]="filters.yearMin"
+              (ngModelChange)="apply({ yearMin: $event })"
+            />
+            <span class="f-dash">–</span>
+            <input
+              type="number"
+              class="input"
+              placeholder="To"
+              [ngModel]="filters.yearMax"
+              (ngModelChange)="apply({ yearMax: $event })"
+            />
+          </div>
+        </div>
+
+        <!-- Transmission -->
+        <div class="f-group">
+          <span class="label">Transmission</span>
+          <div class="f-pills">
+            @for (t of transmissions; track t) {
+              <button
+                class="pill"
+                [class.active]="filters.transmission === t"
+                (click)="apply({ transmission: filters.transmission === t ? '' : t })"
+              >{{ humanize(t) }}</button>
+            }
+          </div>
+        </div>
+
+        <!-- Fuel -->
+        <div class="f-group">
+          <span class="label">Fuel</span>
+          <div class="f-pills">
+            @for (t of fuelTypes; track t) {
+              <button
+                class="pill"
+                [class.active]="filters.fuelType === t"
+                (click)="apply({ fuelType: filters.fuelType === t ? '' : t })"
+              >{{ humanize(t) }}</button>
+            }
+          </div>
+        </div>
+
+        <!-- Seats -->
+        <div class="f-group">
+          <span class="label">Minimum seats</span>
+          <div class="f-pills">
+            @for (s of [5, 7, 8]; track s) {
+              <button
+                class="pill"
+                [class.active]="+filters.seats! === s"
+                (click)="apply({ seats: +filters.seats! === s ? '' : s })"
+              >{{ s }}+ seats</button>
+            }
+          </div>
+        </div>
+
+        <!-- Mileage -->
+        <div class="f-group">
+          <span class="label">Max mileage (km)</span>
+          <input
+            type="number"
+            class="input"
+            placeholder="e.g. 30000"
+            [ngModel]="filters.mileageMax"
+            (ngModelChange)="apply({ mileageMax: $event })"
+          />
+        </div>
+
+        <div class="f-help card">
+          <p class="f-help-title">Can't find it?</p>
+          <p class="f-help-body">Tell us what you're after and we'll source it for you.</p>
+          <a routerLink="/contact" class="btn btn-outline btn-sm btn-block">Request a vehicle</a>
+        </div>
+
+      </div>
+    </aside>
+
+    <!-- ═══════════════ RESULTS ═══════════════ -->
+    <section class="results">
+
+      <div class="res-bar">
+        <button class="btn btn-ghost btn-sm filters-toggle" (click)="filtersOpen.set(true)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
+            <path d="M4 6h16M7 12h10M10 18h4" stroke-linecap="round" />
+          </svg>
+          Filters
+          @if (activeFilterCount) { <span class="f-count">{{ activeFilterCount }}</span> }
+        </button>
+
+        <p class="res-count">
+          @if (loading()) { Searching… }
+          @else if (total()) { <strong>{{ total() }}</strong> vehicle{{ total() === 1 ? '' : 's' }} found }
+          @else { No matches }
+        </p>
+
+        <div class="res-sort">
+          <label class="sr-only" for="inv-sort">Sort by</label>
+          <select
+            id="inv-sort"
+            class="input"
+            [ngModel]="filters.sort"
+            (ngModelChange)="apply({ sort: $event })"
+          >
+            @for (s of sorts; track s.value) {
+              <option [value]="s.value">{{ s.label }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      <!-- Active chips -->
+      @if (activeFilterCount) {
+        <div class="chips">
+          @if (filters.search) {
+            <button class="chip" (click)="apply({ search: '' })">"{{ filters.search }}" ✕</button>
+          }
+          @if (filters.bodyType) {
+            <button class="chip" (click)="apply({ bodyType: '' })">{{ humanize(filters.bodyType) }} ✕</button>
+          }
+          @if (filters.transmission) {
+            <button class="chip" (click)="apply({ transmission: '' })">{{ humanize(filters.transmission) }} ✕</button>
+          }
+          @if (filters.fuelType) {
+            <button class="chip" (click)="apply({ fuelType: '' })">{{ humanize(filters.fuelType) }} ✕</button>
+          }
+          @if (filters.priceMin || filters.priceMax) {
+            <button class="chip" (click)="apply({ priceMin: '', priceMax: '' })">Price filter ✕</button>
+          }
+          @if (filters.yearMin || filters.yearMax) {
+            <button class="chip" (click)="apply({ yearMin: '', yearMax: '' })">Year filter ✕</button>
+          }
+          @if (filters.mileageMax) {
+            <button class="chip" (click)="apply({ mileageMax: '' })">Under {{ filters.mileageMax }} km ✕</button>
+          }
+          @if (filters.seats) {
+            <button class="chip" (click)="apply({ seats: '' })">{{ filters.seats }}+ seats ✕</button>
+          }
+        </div>
+      }
+
+      <!-- Grid -->
+      @if (loading()) {
+        <div class="car-grid">
+          @for (s of skeletons; track s) { <div class="skeleton skel-card"></div> }
+        </div>
+      } @else if (cars().length) {
+        <div class="car-grid">
+          @for (car of cars(); track car.id; let i = $index) {
+            <app-car-card [car]="car" [index]="i" />
+          }
+        </div>
+
+        @if (totalPages() > 1) {
+          <nav class="pager" aria-label="Pagination">
+            <button
+              class="pg-btn"
+              [disabled]="page() === 1"
+              (click)="goToPage(page() - 1)"
+              aria-label="Previous page"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+                <path d="M15 18l-6-6 6-6" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </button>
+
+            @for (p of pageList; track $index) {
+              @if (p === -1) {
+                <span class="pg-gap">…</span>
+              } @else {
+                <button class="pg-btn" [class.active]="p === page()" (click)="goToPage(p)">{{ p }}</button>
+              }
+            }
+
+            <button
+              class="pg-btn"
+              [disabled]="page() === totalPages()"
+              (click)="goToPage(page() + 1)"
+              aria-label="Next page"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+                <path d="M9 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </button>
+          </nav>
+        }
+      } @else {
+        <div class="empty card">
+          <span class="empty-ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <circle cx="11" cy="11" r="7" />
+              <path d="M20 20l-3.5-3.5" stroke-linecap="round" />
+            </svg>
+          </span>
+          <h3 class="empty-title">No vehicles match those filters</h3>
+          <p class="empty-body">Try widening your price range or clearing a filter or two.</p>
+          <button class="btn btn-primary" (click)="reset()">Clear all filters</button>
+        </div>
+      }
+    </section>
+  </div>
+
+  <!-- Compare tray -->
+  @if (shortlist.compareCount() > 0) {
+    <div class="tray glass">
+      <span class="tray-text">
+        <strong>{{ shortlist.compareCount() }}</strong> selected to compare
+      </span>
+      <div class="tray-actions">
+        <button class="btn btn-ghost btn-sm" (click)="shortlist.clearCompare()">Clear</button>
+        <a routerLink="/compare" class="btn btn-primary btn-sm">Compare now</a>
+      </div>
+    </div>
+  }
+</main>
+
+<app-public-footer />
+
+<!-- Mobile filter backdrop -->
+@if (filtersOpen()) {
+  <div class="backdrop" (click)="filtersOpen.set(false)"></div>
+}

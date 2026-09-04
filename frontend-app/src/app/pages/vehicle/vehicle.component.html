@@ -1,0 +1,408 @@
+<app-public-nav />
+
+<main class="veh">
+
+  @if (loading()) {
+    <div class="wrap wrap-wide veh-load">
+      <div class="skeleton sk-hero"></div>
+      <div class="sk-side">
+        <div class="skeleton sk-block"></div>
+        <div class="skeleton sk-block"></div>
+      </div>
+    </div>
+  } @else if (notFound()) {
+    <div class="wrap veh-404">
+      <h1 class="t-h1">Vehicle not found</h1>
+      <p class="t-lead">This listing may have been sold or removed.</p>
+      <button class="btn btn-primary" (click)="backToInventory()">Back to inventory</button>
+    </div>
+  } @else if (car(); as c) {
+
+    <!-- ═══════════════ BREADCRUMB ═══════════════ -->
+    <nav class="crumbs wrap wrap-wide" aria-label="Breadcrumb">
+      <a routerLink="/">Home</a>
+      <span aria-hidden="true">/</span>
+      <a routerLink="/inventory">Inventory</a>
+      <span aria-hidden="true">/</span>
+      @if (c.make) {
+        <a routerLink="/inventory" [queryParams]="{ makeId: c.make.id }">{{ c.make.name }}</a>
+        <span aria-hidden="true">/</span>
+      }
+      <span class="crumb-current">{{ c.model }}</span>
+    </nav>
+
+    <div class="wrap wrap-wide veh-grid">
+
+      <!-- ═══════════════ LEFT: GALLERY + DETAIL ═══════════════ -->
+      <div class="veh-main">
+
+        <!-- Gallery -->
+        <section class="gallery">
+          <div class="gal-stage">
+            <img
+              [src]="gallery()[activeImage()]"
+              [alt]="title"
+              class="gal-img"
+              (error)="onImgError($event)"
+              (click)="lightbox.set(true)"
+            />
+
+            <div class="gal-flags">
+              @if (c.featured) { <span class="badge badge-featured">Featured</span> }
+              @if (discountPct()) { <span class="badge gal-sale">−{{ discountPct() }}%</span> }
+              <span class="badge badge-{{ c.status }}">{{ c.status }}</span>
+            </div>
+
+            @if (gallery().length > 1) {
+              <button class="gal-nav gal-prev" (click)="prevImage()" aria-label="Previous photo">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <path d="M15 18l-6-6 6-6" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </button>
+              <button class="gal-nav gal-next" (click)="nextImage()" aria-label="Next photo">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <path d="M9 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </button>
+              <span class="gal-counter">{{ activeImage() + 1 }} / {{ gallery().length }}</span>
+            }
+
+            <button class="gal-zoom" (click)="lightbox.set(true)" aria-label="View full size">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9">
+                <circle cx="11" cy="11" r="7" />
+                <path d="M20 20l-3.5-3.5M11 8v6M8 11h6" stroke-linecap="round" />
+              </svg>
+            </button>
+          </div>
+
+          @if (gallery().length > 1) {
+            <div class="gal-thumbs no-scrollbar">
+              @for (img of gallery(); track img; let i = $index) {
+                <button
+                  class="gal-thumb"
+                  [class.active]="i === activeImage()"
+                  (click)="selectImage(i)"
+                  [attr.aria-label]="'View photo ' + (i + 1)"
+                >
+                  <img [src]="img" alt="" (error)="onImgError($event)" />
+                </button>
+              }
+            </div>
+          }
+        </section>
+
+        <!-- Title block -->
+        <header class="veh-head">
+          <div class="veh-head-main">
+            <span class="veh-make">{{ c.make?.name }}</span>
+            <h1 class="t-h1 veh-title">{{ c.model }}</h1>
+            <div class="veh-tags">
+              <span class="vtag">{{ c.year }}</span>
+              @if (c.bodyType) { <span class="vtag">{{ humanize(c.bodyType) }}</span> }
+              @if (c.transmission) { <span class="vtag">{{ humanize(c.transmission) }}</span> }
+              @if (c.fuelType) { <span class="vtag">{{ humanize(c.fuelType) }}</span> }
+              <span class="vtag">{{ fmtMileage(c.mileage) }}</span>
+              @if (c.views) { <span class="vtag vtag-dim">{{ c.views }} views</span> }
+            </div>
+          </div>
+
+          <div class="veh-head-actions">
+            <button
+              class="icon-act"
+              [class.on]="shortlist.isFavourite(c.id)"
+              (click)="toggleFavourite()"
+              [attr.aria-pressed]="shortlist.isFavourite(c.id)"
+              aria-label="Save this vehicle"
+            >
+              <svg viewBox="0 0 24 24" [attr.fill]="shortlist.isFavourite(c.id) ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="1.9">
+                <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1L12 21l7.7-7.6 1.1-1a5.5 5.5 0 0 0 0-7.8z" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </button>
+            <button
+              class="icon-act"
+              [class.on]="shortlist.isComparing(c.id)"
+              (click)="toggleCompare()"
+              aria-label="Add to compare"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9">
+                <path d="M9 3v18M15 3v18M3 9h18M3 15h18" stroke-linecap="round" />
+              </svg>
+            </button>
+            <button class="icon-act" (click)="share()" aria-label="Share this listing">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9">
+                <circle cx="18" cy="5" r="2.6" /><circle cx="6" cy="12" r="2.6" /><circle cx="18" cy="19" r="2.6" />
+                <path d="M8.3 10.8l7.4-4.3M8.3 13.2l7.4 4.3" stroke-linecap="round" />
+              </svg>
+            </button>
+          </div>
+        </header>
+
+        <!-- Description -->
+        @if (c.description) {
+          <section class="veh-block card">
+            <h2 class="block-title">About this vehicle</h2>
+            <p class="veh-desc">{{ c.description }}</p>
+          </section>
+        }
+
+        <!-- Specs -->
+        <section class="veh-block card">
+          <h2 class="block-title">Specifications</h2>
+          <dl class="spec-grid">
+            @for (s of specs; track s.label) {
+              <div class="spec">
+                <dt class="spec-label">{{ s.label }}</dt>
+                <dd class="spec-value">{{ s.value }}</dd>
+              </div>
+            }
+          </dl>
+        </section>
+
+        <!-- Features -->
+        @if (c.features?.length) {
+          <section class="veh-block card">
+            <h2 class="block-title">Features &amp; equipment</h2>
+            <ul class="feat-grid">
+              @for (f of c.features; track f) {
+                <li class="feat">
+                  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true">
+                    <path d="M4 10.5l4 4 8-9" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                  {{ f }}
+                </li>
+              }
+            </ul>
+          </section>
+        }
+
+        <!-- Financing calculator -->
+        <section class="veh-block card calc">
+          <h2 class="block-title">Estimate your monthly payment</h2>
+          <p class="calc-sub">
+            Indicative figures at {{ interestRate }}% p.a. Final terms depend on the bank and your credit profile.
+          </p>
+
+          <div class="calc-body">
+            <div class="calc-controls">
+              <div class="calc-field">
+                <div class="calc-field-head">
+                  <label class="label" for="dp">Down payment</label>
+                  <span class="calc-val">{{ downPct() }}% · {{ fmtPrice(loan().downPayment) }}</span>
+                </div>
+                <input
+                  id="dp"
+                  type="range"
+                  min="10"
+                  max="60"
+                  step="5"
+                  [value]="downPct()"
+                  (input)="downPct.set(+$any($event.target).value)"
+                />
+              </div>
+
+              <div class="calc-field">
+                <span class="label">Loan term</span>
+                <div class="term-pills">
+                  @for (t of termOptions; track t) {
+                    <button
+                      class="pill"
+                      [class.active]="termMonths() === t"
+                      (click)="termMonths.set(t)"
+                    >{{ t }} mo</button>
+                  }
+                </div>
+              </div>
+            </div>
+
+            <div class="calc-result">
+              <span class="calc-result-label">Estimated monthly</span>
+              <span class="calc-monthly">{{ fmtPrice(loan().monthly) }}</span>
+              <dl class="calc-breakdown">
+                <div><dt>Amount financed</dt><dd>{{ fmtPrice(loan().principal) }}</dd></div>
+                <div><dt>Total interest</dt><dd>{{ fmtPrice(loan().totalInterest) }}</dd></div>
+                <div><dt>Total payable</dt><dd>{{ fmtPrice(loan().totalPayable + loan().downPayment) }}</dd></div>
+              </dl>
+            </div>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- ═══════════════ RIGHT: STICKY PRICE + FORM ═══════════════ -->
+      <aside class="veh-side">
+        <div class="side-inner">
+
+          <div class="price-card card">
+            @if (c.originalPrice && discountPct()) {
+              <span class="price-was">{{ fmtPrice(c.originalPrice) }}</span>
+            }
+            <span class="price-now">{{ fmtPrice(c.price) }}</span>
+            <span class="price-monthly">
+              or about <strong>{{ fmtPrice(loan().monthly) }}</strong>/month
+            </span>
+
+            <div class="price-status">
+              <span class="badge badge-{{ c.status }}">{{ c.status }}</span>
+              @if (c.status === 'available') {
+                <span class="price-avail"><span class="live-dot"></span> Ready for viewing</span>
+              }
+            </div>
+
+            <div class="price-actions">
+              <a [href]="whatsapp" target="_blank" rel="noopener noreferrer" class="btn btn-wa btn-block">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.16-.17.2-.35.22-.64.08-.3-.15-1.26-.47-2.4-1.48-.88-.79-1.48-1.76-1.65-2.06-.17-.3-.02-.46.13-.6.14-.14.3-.35.45-.53.15-.17.2-.3.3-.5.1-.2.05-.37-.03-.52-.07-.15-.67-1.61-.91-2.21-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.8.37-.27.3-1.03 1.02-1.03 2.48s1.06 2.88 1.21 3.07c.15.2 2.1 3.2 5.08 4.49.71.3 1.26.49 1.69.62.71.23 1.36.2 1.87.12.57-.09 1.76-.72 2-1.41.25-.7.25-1.29.18-1.42-.08-.12-.28-.2-.57-.34m-5.42 7.4h-.01a9.87 9.87 0 01-5.03-1.38l-.36-.21-3.74.98 1-3.65-.24-.37a9.86 9.86 0 01-1.51-5.26c0-5.45 4.44-9.89 9.89-9.89 2.64 0 5.12 1.03 6.99 2.9a9.83 9.83 0 012.89 6.99c0 5.45-4.43 9.89-9.88 9.89m8.41-18.3A11.82 11.82 0 0012.05 0C5.5 0 .16 5.34.16 11.89c0 2.1.55 4.14 1.59 5.95L.06 24l6.3-1.65a11.88 11.88 0 005.69 1.45h.005c6.55 0 11.89-5.34 11.89-11.89a11.82 11.82 0 00-3.48-8.41z" />
+                </svg>
+                Chat on WhatsApp
+              </a>
+              <a [href]="'tel:' + brand.contact.phoneRaw" class="btn btn-ghost btn-block">
+                Call {{ brand.contact.phone }}
+              </a>
+            </div>
+
+            <p class="price-note">{{ brand.contact.hours }} · {{ brand.contact.city }}</p>
+          </div>
+
+          <!-- Enquiry form -->
+          <div class="form-card card">
+            @if (submitted()) {
+              <div class="sent">
+                <span class="sent-ico" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <path d="M5 13l4 4 10-11" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                </span>
+                <h3 class="sent-title">Enquiry sent</h3>
+                <p class="sent-body">
+                  Thanks! Our team will reach out shortly — usually within the hour
+                  during business hours.
+                </p>
+                <a [href]="whatsapp" target="_blank" rel="noopener noreferrer" class="btn btn-wa btn-block">
+                  Message us now instead
+                </a>
+              </div>
+            } @else {
+              <h3 class="form-title">Enquire about this vehicle</h3>
+              <p class="form-sub">No obligation. We'll confirm availability and answer any questions.</p>
+
+              <form [formGroup]="form" (ngSubmit)="submit()" class="form">
+                <div class="field">
+                  <label class="label" for="lead-type">I want to</label>
+                  <select id="lead-type" class="input" formControlName="type">
+                    <option value="inquiry">Ask about this vehicle</option>
+                    <option value="test_drive">Book a test drive</option>
+                    <option value="financing">Get financing options</option>
+                    <option value="trade_in">Trade in my car</option>
+                  </select>
+                </div>
+
+                <div class="field">
+                  <label class="label" for="lead-name">Your name *</label>
+                  <input
+                    id="lead-name"
+                    class="input"
+                    [class.invalid]="invalid('name')"
+                    formControlName="name"
+                    placeholder="Juan Dela Cruz"
+                    autocomplete="name"
+                  />
+                  @if (invalid('name')) { <span class="field-error">Please enter your name</span> }
+                </div>
+
+                <div class="field">
+                  <label class="label" for="lead-phone">Mobile number *</label>
+                  <input
+                    id="lead-phone"
+                    class="input"
+                    [class.invalid]="invalid('phone')"
+                    formControlName="phone"
+                    placeholder="0917 123 4567"
+                    autocomplete="tel"
+                    inputmode="tel"
+                  />
+                  @if (invalid('phone')) { <span class="field-error">A contact number is required</span> }
+                </div>
+
+                <div class="field">
+                  <label class="label" for="lead-email">Email <span class="opt">(optional)</span></label>
+                  <input
+                    id="lead-email"
+                    class="input"
+                    [class.invalid]="invalid('email')"
+                    formControlName="email"
+                    type="email"
+                    placeholder="you@email.com"
+                    autocomplete="email"
+                  />
+                  @if (invalid('email')) { <span class="field-error">Check the email address</span> }
+                </div>
+
+                @if (form.value.type === 'test_drive') {
+                  <div class="field">
+                    <label class="label" for="lead-date">Preferred date</label>
+                    <input id="lead-date" class="input" type="date" formControlName="preferredDate" />
+                  </div>
+                }
+
+                <div class="field">
+                  <label class="label" for="lead-msg">Message</label>
+                  <textarea id="lead-msg" class="input" formControlName="message" rows="3"></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block" [disabled]="submitting()">
+                  @if (submitting()) { <span class="spinner"></span> Sending… }
+                  @else { Send enquiry }
+                </button>
+
+                <p class="form-legal">
+                  By sending, you agree to be contacted about this vehicle.
+                  We never share your details.
+                </p>
+              </form>
+            }
+          </div>
+
+        </div>
+      </aside>
+    </div>
+
+    <!-- ═══════════════ SIMILAR ═══════════════ -->
+    @if (similar().length) {
+      <section class="section similar">
+        <div class="wrap wrap-wide">
+          <div class="sim-head">
+            <span class="eyebrow">You might also like</span>
+            <h2 class="t-h2 sim-title">Similar vehicles</h2>
+          </div>
+          <div class="car-grid">
+            @for (s of similar(); track s.id; let i = $index) {
+              <app-car-card [car]="s" [index]="i" />
+            }
+          </div>
+        </div>
+      </section>
+    }
+
+    <!-- Lightbox -->
+    @if (lightbox()) {
+      <div class="lb" (click)="lightbox.set(false)">
+        <button class="lb-close" (click)="lightbox.set(false)" aria-label="Close">✕</button>
+        <img [src]="gallery()[activeImage()]" [alt]="title" class="lb-img" (click)="$event.stopPropagation()" />
+        @if (gallery().length > 1) {
+          <button class="lb-nav lb-prev" (click)="$event.stopPropagation(); prevImage()" aria-label="Previous">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M15 18l-6-6 6-6" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </button>
+          <button class="lb-nav lb-next" (click)="$event.stopPropagation(); nextImage()" aria-label="Next">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M9 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </button>
+        }
+      </div>
+    }
+  }
+</main>
+
+<app-public-footer />

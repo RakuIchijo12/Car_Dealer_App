@@ -1,17 +1,47 @@
 # See http://help.github.com/ignore-files/ for more about ignoring files.
 
-# Compiled output
-/dist
-/tmp
-/out-tsc
-/bazel-out
+# ── Dependencies ──────────────────────────────────────────────────────────────
+# Unanchored so they match backend/, frontend-app/ and any future workspace.
+node_modules/
+.pnp
+.pnp.js
 
-# Node
-/node_modules
-npm-debug.log
-yarn-error.log
+# ── Build output ──────────────────────────────────────────────────────────────
+dist/
+tmp/
+out-tsc/
+bazel-out/
+build/
+*.tsbuildinfo
 
-# IDEs and editors
+# ── Caches ────────────────────────────────────────────────────────────────────
+.angular/
+.sass-cache/
+coverage/
+.nyc_output/
+.vite/
+.eslintcache
+
+# ── Logs ──────────────────────────────────────────────────────────────────────
+*.log
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+testem.log
+libpeerconnection.log
+
+# ── Environment files — never commit secrets ──────────────────────────────────
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+
+# ── Uploaded vehicle photos (use object storage in production) ────────────────
+uploads/
+
+# ── IDEs and editors ──────────────────────────────────────────────────────────
 .idea/
 .project
 .classpath
@@ -19,37 +49,19 @@ yarn-error.log
 *.launch
 .settings/
 *.sublime-workspace
-
-# Visual Studio Code
+.history/
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
-.history/*
 
-# Miscellaneous
-/.angular/cache
-.sass-cache/
-/connect.lock
-/coverage
-/libpeerconnection.log
-testem.log
-/typings
-
-# System files
+# ── System files ──────────────────────────────────────────────────────────────
 .DS_Store
 Thumbs.db
+desktop.ini
 
-# Environment files — never commit secrets
-.env
-api/.env
-
-# API artifacts
-api/dist/
-api/node_modules/
-
-# Uploaded car photos (use cloud storage in production)
-uploads/
-api/uploads/
+# ── Deploy ────────────────────────────────────────────────────────────────────
 .vercel
+connect.lock
+typings/

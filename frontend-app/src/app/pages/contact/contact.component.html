@@ -1,0 +1,183 @@
+<app-public-nav />
+
+<main class="ct">
+  <header class="ct-hero">
+    <div class="aurora" aria-hidden="true"></div>
+    <div class="grid-lines" aria-hidden="true"></div>
+    <div class="wrap wrap-wide ct-hero-inner">
+      <span class="eyebrow">Get in touch</span>
+      <h1 class="t-h1 ct-title">Come see the cars<br />in person.</h1>
+      <p class="t-lead ct-sub">
+        No pressure, no hard sell. Visit the lot, take one out for a drive,
+        and ask us anything. We reply within the hour during business hours.
+      </p>
+    </div>
+  </header>
+
+  <div class="wrap wrap-wide ct-body">
+
+    <!-- ── Info column ── -->
+    <aside class="ct-info">
+      <div class="info-card card">
+        <span class="info-ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 21s7-5.5 7-11a7 7 0 10-14 0c0 5.5 7 11 7 11z" />
+            <circle cx="12" cy="10" r="2.5" />
+          </svg>
+        </span>
+        <h2 class="info-title">Visit the lot</h2>
+        <p class="info-body">{{ brand.contact.address }}<br />{{ brand.contact.city }}, {{ brand.contact.region }}</p>
+        <a [href]="mapLink" target="_blank" rel="noopener noreferrer" class="info-link">Open in Google Maps →</a>
+      </div>
+
+      <div class="info-card card">
+        <span class="info-ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3.1 19.5 19.5 0 01-6-6A19.8 19.8 0 012.1 4.2 2 2 0 014.1 2h3a2 2 0 012 1.7c.1 1 .4 1.9.7 2.8a2 2 0 01-.5 2.1L8.1 9.9a16 16 0 006 6l1.3-1.2a2 2 0 012.1-.5c.9.3 1.8.6 2.8.7a2 2 0 011.7 2z" />
+          </svg>
+        </span>
+        <h2 class="info-title">Call or message</h2>
+        <p class="info-body">
+          <a [href]="'tel:' + brand.contact.phoneRaw" class="info-strong">{{ brand.contact.phone }}</a><br />
+          <a [href]="'mailto:' + brand.contact.email" class="info-muted">{{ brand.contact.email }}</a>
+        </p>
+        <a [href]="whatsapp" target="_blank" rel="noopener noreferrer" class="btn btn-wa btn-sm btn-block info-wa">
+          Chat on WhatsApp
+        </a>
+      </div>
+
+      <div class="info-card card">
+        <span class="info-ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
+            <circle cx="12" cy="12" r="9" />
+            <path d="M12 7v5l3.5 2" />
+          </svg>
+        </span>
+        <h2 class="info-title">Opening hours</h2>
+        <p class="info-body">{{ brand.contact.hours }}<br /><span class="info-muted">Sundays by appointment</span></p>
+      </div>
+    </aside>
+
+    <!-- ── Form ── -->
+    <section class="ct-form-wrap">
+      <div class="form-card card">
+        @if (submitted()) {
+          <div class="sent">
+            <span class="sent-ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <path d="M5 13l4 4 10-11" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </span>
+            <h2 class="sent-title">Message received</h2>
+            <p class="sent-body">
+              Thanks for reaching out. Someone from the team will get back to you
+              shortly — usually within the hour during business hours.
+            </p>
+            <div class="sent-actions">
+              <button class="btn btn-ghost" (click)="submitted.set(false)">Send another message</button>
+              <a [href]="whatsapp" target="_blank" rel="noopener noreferrer" class="btn btn-wa">Message us now</a>
+            </div>
+          </div>
+        } @else {
+          <h2 class="form-title">Send us a message</h2>
+          <p class="form-sub">Tell us what you're after and we'll come back with options.</p>
+
+          <form [formGroup]="form" (ngSubmit)="submit()" class="form">
+            <div class="field">
+              <label class="label" for="ct-type">What's this about?</label>
+              <select id="ct-type" class="input" formControlName="type">
+                @for (r of reasons; track r.value) {
+                  <option [value]="r.value">{{ r.label }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="form-row">
+              <div class="field">
+                <label class="label" for="ct-name">Your name *</label>
+                <input
+                  id="ct-name"
+                  class="input"
+                  [class.invalid]="invalid('name')"
+                  formControlName="name"
+                  placeholder="Juan Dela Cruz"
+                  autocomplete="name"
+                />
+                @if (invalid('name')) { <span class="field-error">Please enter your name</span> }
+              </div>
+
+              <div class="field">
+                <label class="label" for="ct-phone">Mobile number *</label>
+                <input
+                  id="ct-phone"
+                  class="input"
+                  [class.invalid]="invalid('phone')"
+                  formControlName="phone"
+                  placeholder="0917 123 4567"
+                  autocomplete="tel"
+                  inputmode="tel"
+                />
+                @if (invalid('phone')) { <span class="field-error">A contact number is required</span> }
+              </div>
+            </div>
+
+            <div class="field">
+              <label class="label" for="ct-email">Email <span class="opt">(optional)</span></label>
+              <input
+                id="ct-email"
+                class="input"
+                [class.invalid]="invalid('email')"
+                formControlName="email"
+                type="email"
+                placeholder="you@email.com"
+                autocomplete="email"
+              />
+              @if (invalid('email')) { <span class="field-error">Check the email address</span> }
+            </div>
+
+            <div class="field">
+              <label class="label" for="ct-msg">Message *</label>
+              <textarea
+                id="ct-msg"
+                class="input"
+                [class.invalid]="invalid('message')"
+                formControlName="message"
+                rows="5"
+                placeholder="Tell us what you're looking for — budget, body type, brand, anything."
+              ></textarea>
+              @if (invalid('message')) {
+                <span class="field-error">Please write at least a sentence so we can help properly</span>
+              }
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-lg" [disabled]="submitting()">
+              @if (submitting()) { <span class="spinner"></span> Sending… }
+              @else { Send message }
+            </button>
+
+            <p class="form-legal">
+              We only use your details to respond to this enquiry. No spam, ever.
+            </p>
+          </form>
+        }
+      </div>
+    </section>
+  </div>
+
+  <!-- ── Map ── -->
+  <section class="ct-map-section">
+    <div class="wrap wrap-wide">
+      <div class="map-frame card">
+        <iframe
+          [src]="mapEmbed"
+          class="map"
+          title="Map showing our location"
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+        ></iframe>
+      </div>
+    </div>
+  </section>
+</main>
+
+<app-public-footer />

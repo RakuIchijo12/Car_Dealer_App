@@ -1,23 +1,54 @@
 import {
   Controller, Get, Post, Patch, Delete, Body, Param, Query,
-  UseGuards, UseInterceptors, UploadedFile, ParseIntPipe,
+  UseGuards, UseInterceptors, UploadedFiles, ParseIntPipe, BadRequestException,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
+import { existsSync, mkdirSync } from 'fs';
 import { CarsService, CarFilters } from './cars.service';
 import { CreateCarDto } from './dto/create-car.dto';
 import { UpdateCarDto } from './dto/update-car.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CarStatus } from './car.entity';
 
-const photoStorage = diskStorage({
-  destination: './uploads',
-  filename: (_, file, cb) => {
-    const unique = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    cb(null, `car-${unique}${extname(file.originalname)}`);
+const UPLOAD_DEST = './uploads';
+const ALLOWED_MIME = ['image/jpeg', 'image/png', 'image/webp', 'image/avif'];
+const MAX_FILE_SIZE = 8 * 1024 * 1024; // 8 MB
+
+if (!existsSync(UPLOAD_DEST)) mkdirSync(UPLOAD_DEST, { recursive: true });
+
+const uploadOptions = {
+  storage: diskStorage({
+    destination: UPLOAD_DEST,
+    filename: (_req, file, cb) => {
+      const unique = Date.now() + '-' + Math.round(Math.random() * 1e9);
+      cb(null, `car-${unique}${extname(file.originalname).toLowerCase()}`);
+    },
+  }),
+  limits: { fileSize: MAX_FILE_SIZE, files: 9 },
+  fileFilter: (
+    _req: unknown,
+    file: Express.Multer.File,
+    cb: (error: Error | null, acceptFile: boolean) => void,
+  ) => {
+    if (!ALLOWED_MIME.includes(file.mimetype)) {
+      return cb(new BadRequestException('Only JPG, PNG, WEBP or AVIF images are allowed'), false);
+    }
+    cb(null, true);
   },
-});
+};
+
+/** `photo` is the cover image, `images` the extra gallery shots. */
+const carPhotoFields = FileFieldsInterceptor(
+  [
+    { name: 'photo', maxCount: 1 },
+    { name: 'images', maxCount: 8 },
+  ],
+  uploadOptions,
+);
+
+type CarUploads = { photo?: Express.Multer.File[]; images?: Express.Multer.File[] };
 
 @UseGuards(JwtAuthGuard)
 @Controller('cars')
@@ -33,7 +64,7 @@ export class CarsController {
     @Query('priceMin') priceMin?: string,
     @Query('priceMax') priceMax?: string,
     @Query('search') search?: string,
-    @Query('sortBy') sortBy?: 'year' | 'price' | 'mileage',
+    @Query('sortBy') sortBy?: 'year' | 'price' | 'mileage' | 'createdAt',
     @Query('sortOrder') sortOrder?: 'ASC' | 'DESC',
   ) {
     const filters: CarFilters = {
@@ -56,8 +87,8 @@ export class CarsController {
   }
 
   @Get('recent')
-  getRecent() {
-    return this.carsService.getRecent();
+  getRecent(@Query('limit') limit?: string) {
+    return this.carsService.getRecent(limit ? +limit : 5);
   }
 
   @Get(':id')
@@ -66,24 +97,55 @@ export class CarsController {
   }
 
   @Post()
-  @UseInterceptors(FileInterceptor('photo', { storage: photoStorage }))
-  create(@Body() dto: CreateCarDto, @UploadedFile() file?: Express.Multer.File) {
-    return this.carsService.create(dto, file?.filename);
+  @UseInterceptors(carPhotoFields)
+  create(@Body() dto: CreateCarDto, @UploadedFiles() files?: CarUploads) {
+    return this.carsService.create(
+      dto,
+      files?.photo?.[0]?.filename,
+      (files?.images ?? []).map((f) => f.filename),
+    );
   }
 
   @Patch(':id')
-  @UseInterceptors(FileInterceptor('photo', { storage: photoStorage }))
+  @UseInterceptors(carPhotoFields)
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateCarDto,
-    @UploadedFile() file?: Express.Multer.File,
+    @UploadedFiles() files?: CarUploads,
   ) {
-    return this.carsService.update(id, dto, file?.filename);
+    return this.carsService.update(
+      id,
+      dto,
+      files?.photo?.[0]?.filename,
+      (files?.images ?? []).map((f) => f.filename),
+    );
   }
 
   @Patch(':id/sell')
   markAsSold(@Param('id', ParseIntPipe) id: number) {
     return this.carsService.markAsSold(id);
+  }
+
+  @Patch(':id/status')
+  setStatus(@Param('id', ParseIntPipe) id: number, @Body('status') status: CarStatus) {
+    if (!Object.values(CarStatus).includes(status)) {
+      throw new BadRequestException('Invalid status');
+    }
+    return this.carsService.setStatus(id, status);
+  }
+
+  @Patch(':id/featured')
+  toggleFeatured(@Param('id', ParseIntPipe) id: number) {
+    return this.carsService.toggleFeatured(id);
+  }
+
+  @Delete(':id/images/:filename')
+  removeImage(@Param('id', ParseIntPipe) id: number, @Param('filename') filename: string) {
+    // Guard against traversal — only a bare filename may be deleted.
+    if (filename.includes('/') || filename.includes('\\') || filename.includes('..')) {
+      throw new BadRequestException('Invalid filename');
+    }
+    return this.carsService.removeImage(id, filename);
   }
 
   @Delete(':id')

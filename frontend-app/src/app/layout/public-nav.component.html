@@ -1,0 +1,83 @@
+<header class="nav" [class.nav-scrolled]="scrolled()">
+  <div class="nav-inner wrap wrap-wide">
+
+    <a routerLink="/" class="logo" (click)="closeMenu()" aria-label="{{ brand.name }} {{ brand.nameSuffix }} home">
+      <span class="logo-mark" aria-hidden="true">
+        <svg viewBox="0 0 32 32" fill="none">
+          <defs>
+            <linearGradient id="vlg" x1="0" y1="0" x2="32" y2="32">
+              <stop offset="0" stop-color="#FFC24A" />
+              <stop offset="1" stop-color="#FF7A18" />
+            </linearGradient>
+          </defs>
+          <path d="M4 21.5 L11 6 L16 6 L9 21.5 Z" fill="url(#vlg)" />
+          <path d="M14 21.5 L21 6 L26 6 L19 21.5 Z" fill="url(#vlg)" opacity="0.55" />
+          <rect x="4" y="24" width="22" height="2.5" rx="1.25" fill="url(#vlg)" />
+        </svg>
+      </span>
+      <span class="logo-text">
+        {{ brand.name }}<span class="logo-sub">{{ brand.nameSuffix }}</span>
+      </span>
+    </a>
+
+    <nav class="nav-links" [class.open]="menuOpen()">
+      @for (link of links; track link.route) {
+        <a
+          [routerLink]="link.route"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: link.route === '/' }"
+          class="nav-link"
+          (click)="closeMenu()"
+        >{{ link.label }}</a>
+      }
+
+      <!-- Mobile-only actions, hidden on desktop where they sit in the bar -->
+      <div class="nav-mobile-actions">
+        <a [href]="'tel:' + brand.contact.phoneRaw" class="btn btn-primary btn-block">
+          Call {{ brand.contact.phone }}
+        </a>
+      </div>
+    </nav>
+
+    <div class="nav-actions">
+      <a routerLink="/favourites" class="icon-btn" title="Saved vehicles" aria-label="Saved vehicles">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9">
+          <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1L12 21l7.7-7.6 1.1-1a5.5 5.5 0 0 0 0-7.8z" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        @if (shortlist.favouriteCount() > 0) {
+          <span class="icon-badge">{{ shortlist.favouriteCount() }}</span>
+        }
+      </a>
+
+      <a routerLink="/compare" class="icon-btn" title="Compare vehicles" aria-label="Compare vehicles">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9">
+          <path d="M9 3v18M15 3v18M3 9h18M3 15h18" stroke-linecap="round" />
+        </svg>
+        @if (shortlist.compareCount() > 0) {
+          <span class="icon-badge">{{ shortlist.compareCount() }}</span>
+        }
+      </a>
+
+      <a [href]="'tel:' + brand.contact.phoneRaw" class="nav-phone">
+        <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+          <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+        </svg>
+        <span>{{ brand.contact.phone }}</span>
+      </a>
+
+      <a routerLink="/inventory" class="btn btn-primary btn-sm nav-cta">Browse Cars</a>
+
+      <button
+        class="burger"
+        (click)="toggleMenu()"
+        [attr.aria-expanded]="menuOpen()"
+        aria-label="Toggle navigation menu"
+      >
+        <span [class.x1]="menuOpen()"></span>
+        <span [class.x2]="menuOpen()"></span>
+        <span [class.x3]="menuOpen()"></span>
+      </button>
+    </div>
+
+  </div>
+</header>

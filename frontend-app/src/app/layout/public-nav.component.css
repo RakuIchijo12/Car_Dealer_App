@@ -1,0 +1,200 @@
+.nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 900;
+  transition: background 0.35s var(--ease), backdrop-filter 0.35s, border-color 0.35s, padding 0.35s;
+  border-bottom: 1px solid transparent;
+  padding-block: 0.55rem;
+}
+
+.nav-scrolled {
+  background: rgba(7, 8, 12, 0.82);
+  backdrop-filter: blur(18px) saturate(150%);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  border-bottom-color: var(--hairline);
+}
+
+.nav-inner {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  min-height: 62px;
+}
+
+/* ── Logo ── */
+.logo { display: flex; align-items: center; gap: 0.65rem; flex-shrink: 0; }
+.logo-mark { width: 30px; height: 30px; }
+.logo-mark svg { width: 100%; height: 100%; }
+.logo-text {
+  font-family: 'Sora', sans-serif;
+  font-size: 1.18rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+.logo-sub {
+  color: var(--text-3);
+  font-weight: 500;
+  margin-left: 0.32rem;
+  font-size: 0.82rem;
+  letter-spacing: 0.02em;
+}
+
+/* ── Links ── */
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-left: auto;
+}
+
+.nav-link {
+  position: relative;
+  padding: 0.5rem 0.85rem;
+  border-radius: 99px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-2);
+  transition: color 0.2s, background 0.2s;
+}
+.nav-link:hover { color: var(--text); background: rgba(255, 255, 255, 0.05); }
+.nav-link.active { color: var(--text); }
+.nav-link.active::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 2px;
+  transform: translateX(-50%);
+  width: 16px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--grad);
+}
+
+.nav-mobile-actions { display: none; }
+
+/* ── Actions ── */
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.icon-btn {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  color: var(--text-2);
+  border: 1px solid transparent;
+  transition: all 0.22s;
+}
+.icon-btn svg { width: 17px; height: 17px; }
+.icon-btn:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--hairline);
+}
+
+.icon-badge {
+  position: absolute;
+  top: -1px;
+  right: -1px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 99px;
+  background: var(--grad);
+  color: #1A1000;
+  font-size: 0.62rem;
+  font-weight: 800;
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--ink);
+}
+
+.nav-phone {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding-inline: 0.6rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-2);
+  transition: color 0.2s;
+}
+.nav-phone svg { width: 14px; height: 14px; color: var(--amber); }
+.nav-phone:hover { color: var(--text); }
+
+/* ── Burger ── */
+.burger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 38px;
+  height: 38px;
+  padding: 0 9px;
+  background: none;
+  border: 1px solid var(--hairline-2);
+  border-radius: 10px;
+  cursor: pointer;
+}
+.burger span {
+  display: block;
+  height: 1.8px;
+  width: 100%;
+  background: var(--text);
+  border-radius: 2px;
+  transition: transform 0.3s var(--ease), opacity 0.2s;
+}
+.burger .x1 { transform: translateY(6.8px) rotate(45deg); }
+.burger .x2 { opacity: 0; }
+.burger .x3 { transform: translateY(-6.8px) rotate(-45deg); }
+
+/* ── Responsive ── */
+@media (max-width: 1080px) {
+  .nav-phone { display: none; }
+}
+
+@media (max-width: 900px) {
+  .burger { display: flex; }
+  .nav-cta { display: none; }
+
+  .nav-links {
+    position: fixed;
+    inset: 62px 0 auto 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.15rem;
+    margin: 0;
+    padding: 1rem clamp(1rem, 4vw, 2.5rem) 1.5rem;
+    background: rgba(11, 13, 19, 0.97);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--hairline);
+    transform: translateY(-120%);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.38s var(--ease), opacity 0.25s;
+    max-height: calc(100vh - 62px);
+    overflow-y: auto;
+  }
+  .nav-links.open {
+    transform: none;
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .nav-link {
+    padding: 0.85rem 1rem;
+    border-radius: 12px;
+    font-size: 1rem;
+  }
+  .nav-link.active { background: var(--amber-soft); color: var(--amber); }
+  .nav-link.active::after { display: none; }
+
+  .nav-mobile-actions { display: block; margin-top: 0.75rem; }
+}

@@ -1,54 +1,27 @@
 {
-  "name": "obsentry-project",
-  "version": "0.0.0",
-  "scripts": {
-    "ng": "ng",
-    "start": "ng serve",
-    "build": "ng build",
-    "watch": "ng build --watch --configuration development",
-    "test": "ng test"
-  },
+  "name": "velora-motors",
+  "version": "1.0.0",
+  "description": "Velora Motors — pre-owned vehicle storefront and dealership management system",
   "private": true,
-  "dependencies": {
-    "@angular/animations": "^22.0.0",
-    "@angular/common": "^22.0.0",
-    "@angular/compiler": "^22.0.0",
-    "@angular/core": "^22.0.0",
-    "@angular/forms": "^22.0.0",
-    "@angular/platform-browser": "^22.0.0",
-    "@angular/router": "^22.0.0",
-    "@nestjs/config": "^3.3.0",
-    "@nestjs/jwt": "^10.2.0",
-    "@nestjs/passport": "^10.0.3",
-    "@nestjs/typeorm": "^10.0.2",
-    "bcrypt": "^5.1.1",
-    "passport": "^0.7.0",
-    "passport-local": "^1.0.0",
-    "pg": "^8.13.1",
-    "postcss": "^8.5.15",
-    "rxjs": "~7.8.0",
-    "tslib": "^2.3.0",
-    "typeorm": "^0.3.20",
-    "uuid": "^11.0.2",
-    "zone.js": "~0.15.0"
+  "scripts": {
+    "install:all": "npm --prefix backend install && npm --prefix frontend-app install",
+    "dev": "concurrently -n api,web -c yellow,cyan \"npm:dev:api\" \"npm:dev:web\"",
+    "dev:api": "npm --prefix backend run start:dev",
+    "dev:web": "npm --prefix frontend-app start",
+    "build": "npm run build:api && npm run build:web",
+    "build:api": "npm --prefix backend run build",
+    "build:web": "npm --prefix frontend-app run build",
+    "start": "npm --prefix backend run start:prod",
+    "seed": "npm --prefix backend run seed",
+    "photos": "npm --prefix backend run photos",
+    "lint": "npm --prefix backend run lint",
+    "test": "npm --prefix backend test",
+    "photos:optimize": "npm --prefix backend run photos:optimize"
   },
   "devDependencies": {
-    "@angular/build": "^22.0.0",
-    "@angular/cli": "~22.0.0",
-    "@angular/compiler-cli": "^22.0.0",
-    "@tailwindcss/vite": "^4.3.1",
-    "@types/jasmine": "~5.1.0",
-    "jasmine-core": "~5.4.0",
-    "karma": "~6.4.0",
-    "karma-chrome-launcher": "~3.2.0",
-    "karma-coverage": "~2.2.0",
-    "karma-jasmine": "~5.1.0",
-    "karma-jasmine-html-reporter": "~2.1.0",
-    "tailwindcss": "^4.3.1",
-    "typescript": "~6.0.0"
+    "concurrently": "^9.1.2"
   },
-  "allowScripts": {
-    "esbuild@0.28.1": true,
-    "esbuild@0.27.7": true
+  "engines": {
+    "node": ">=20"
   }
 }

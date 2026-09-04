@@ -5,23 +5,28 @@ import { User } from '../users/user.entity';
 import { Car } from '../cars/car.entity';
 import { Make } from '../makes/make.entity';
 import { Customer } from '../customers/customer.entity';
+import { Lead } from '../leads/lead.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        type: 'postgres',
-        host: config.get('POSTGRES_HOST'),
-        port: +(config.get<number>('POSTGRES_PORT') ?? 5432),
-        username: config.get('POSTGRES_USER'),
-        password: config.get('POSTGRES_PASSWORD'),
-        database: config.get('POSTGRES_DB'),
-        entities: [User, Car, Make, Customer],
-        synchronize: true,
-        ssl: process.env.POSTGRES_HOST?.includes('neon.tech') ? { rejectUnauthorized: false } : false,
-      }),
+      useFactory: (config: ConfigService) => {
+        const host = config.get<string>('POSTGRES_HOST') ?? 'localhost';
+        const needsSsl = host.includes('neon.tech') || config.get('PGSSLMODE') === 'require';
+        return {
+          type: 'postgres' as const,
+          host,
+          port: +(config.get<number>('POSTGRES_PORT') ?? 5432),
+          username: config.get<string>('POSTGRES_USER'),
+          password: config.get<string>('POSTGRES_PASSWORD'),
+          database: config.get<string>('POSTGRES_DB'),
+          entities: [User, Car, Make, Customer, Lead],
+          synchronize: true,
+          ssl: needsSsl ? { rejectUnauthorized: false } : false,
+        };
+      },
     }),
   ],
 })

@@ -1,40 +1,61 @@
-import { Component, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
+import { ToastService } from '../../core/services/toast.service';
+import { BRAND } from '../../core/brand';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [ReactiveFormsModule, RouterLink],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css',
 })
 export class LoginComponent {
-  form;
+  private fb = inject(FormBuilder);
+  private auth = inject(AuthService);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  private toast = inject(ToastService);
+
+  readonly brand = BRAND;
+
   showPassword = signal(false);
   loading = signal(false);
   error = signal('');
 
-  constructor(private fb: FormBuilder, private auth: AuthService, private router: Router) {
-    this.form = this.fb.group({
-      email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(3)]],
+  form = this.fb.group({
+    email: ['', [Validators.required, Validators.email]],
+    password: ['', [Validators.required, Validators.minLength(3)]],
+  });
+
+  submit() {
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+
+    this.loading.set(true);
+    this.error.set('');
+
+    const { email, password } = this.form.getRawValue();
+
+    this.auth.login(email!, password!).subscribe({
+      next: (res) => {
+        this.toast.success('Welcome back', res.user.name);
+        const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') ?? '/admin/dashboard';
+        void this.router.navigateByUrl(returnUrl);
+      },
+      error: (err) => {
+        this.loading.set(false);
+        this.error.set(err?.error?.message ?? 'Invalid email or password.');
+      },
     });
   }
 
-  submit() {
-    if (this.form.invalid) return;
-    this.loading.set(true);
-    this.error.set('');
-    const { email, password } = this.form.value;
-    this.auth.login(email!, password!).subscribe({
-      next: () => this.router.navigate(['/admin/dashboard']),
-      error: (e) => {
-        this.error.set(e.error?.message || 'Invalid credentials');
-        this.loading.set(false);
-      },
-    });
+  invalid(control: string): boolean {
+    const c = this.form.get(control);
+    return !!c && c.invalid && c.touched;
   }
 }

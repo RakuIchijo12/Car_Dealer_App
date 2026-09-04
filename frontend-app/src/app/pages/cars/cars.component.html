@@ -1,78 +1,259 @@
 <div class="page">
-  <div class="page-header">
-    <div>
-      <h1 class="page-title">Car Inventory</h1>
-      <p class="page-sub">{{ cars().length }} vehicles found</p>
-    </div>
-    <a routerLink="/admin/cars/new" class="btn-primary">+ Add Car</a>
-  </div>
 
-  <!-- Filters -->
-  <div class="glass-card filters-card">
-    <div class="filters-grid">
-      <input [(ngModel)]="filters.search" (ngModelChange)="load()" placeholder="Search model or VIN..." class="input-dark" />
-      <select [(ngModel)]="filters.makeId" (ngModelChange)="load()" class="input-dark">
-        <option value="">All Makes</option>
-        @for (make of makes(); track make.id) {
-          <option [value]="make.id">{{ make.name }}</option>
-        }
+  <header class="page-head">
+    <div>
+      <h1 class="page-title">Inventory</h1>
+      <p class="page-sub">
+        @if (loading()) { Loading… }
+        @else { {{ cars().length }} vehicle{{ cars().length === 1 ? '' : 's' }} }
+      </p>
+    </div>
+    <div class="head-actions">
+      <div class="view-toggle" role="group" aria-label="View mode">
+        <button
+          class="vt-btn"
+          [class.active]="view() === 'grid'"
+          (click)="setView('grid')"
+          aria-label="Grid view"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9">
+            <rect x="3" y="3" width="7" height="7" rx="1.5" /><rect x="14" y="3" width="7" height="7" rx="1.5" />
+            <rect x="3" y="14" width="7" height="7" rx="1.5" /><rect x="14" y="14" width="7" height="7" rx="1.5" />
+          </svg>
+        </button>
+        <button
+          class="vt-btn"
+          [class.active]="view() === 'table'"
+          (click)="setView('table')"
+          aria-label="Table view"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round">
+            <path d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+      </div>
+      <a routerLink="/admin/cars/new" class="btn btn-primary">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true">
+          <path d="M12 5v14M5 12h14" stroke-linecap="round" />
+        </svg>
+        Add vehicle
+      </a>
+    </div>
+  </header>
+
+  <!-- ═══════════════ FILTERS ═══════════════ -->
+  <div class="filters card">
+    <div class="f-search">
+      <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+        <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+      </svg>
+      <input
+        class="input f-search-input"
+        [ngModel]="filters.search"
+        (ngModelChange)="onSearch($event)"
+        placeholder="Search model, VIN or brand…"
+        aria-label="Search inventory"
+      />
+    </div>
+
+    <div class="f-row">
+      <select class="input" [(ngModel)]="filters.makeId" (ngModelChange)="load()" aria-label="Brand">
+        <option value="">All brands</option>
+        @for (m of makes(); track m.id) { <option [value]="m.id">{{ m.name }}</option> }
       </select>
-      <select [(ngModel)]="filters.status" (ngModelChange)="load()" class="input-dark">
-        <option value="">All Status</option>
-        <option value="available">Available</option>
-        <option value="sold">Sold</option>
-        <option value="reserved">Reserved</option>
+
+      <select class="input" [(ngModel)]="filters.status" (ngModelChange)="load()" aria-label="Status">
+        <option value="">All statuses</option>
+        @for (s of statuses; track s) { <option [value]="s">{{ humanize(s) }}</option> }
       </select>
-      <input [(ngModel)]="filters.yearMin" (ngModelChange)="load()" placeholder="Year from" type="number" class="input-dark" />
-      <input [(ngModel)]="filters.yearMax" (ngModelChange)="load()" placeholder="Year to" type="number" class="input-dark" />
-      <input [(ngModel)]="filters.priceMin" (ngModelChange)="load()" placeholder="Min price" type="number" class="input-dark" />
-      <input [(ngModel)]="filters.priceMax" (ngModelChange)="load()" placeholder="Max price" type="number" class="input-dark" />
-      <select [(ngModel)]="filters.sortBy" (ngModelChange)="load()" class="input-dark">
-        <option value="">Sort by</option>
-        <option value="year">Year</option>
+
+      <input class="input" type="number" [(ngModel)]="filters.yearMin" (ngModelChange)="load()" placeholder="Year from" aria-label="Year from" />
+      <input class="input" type="number" [(ngModel)]="filters.yearMax" (ngModelChange)="load()" placeholder="Year to" aria-label="Year to" />
+      <input class="input" type="number" [(ngModel)]="filters.priceMin" (ngModelChange)="load()" placeholder="Min ₱" aria-label="Minimum price" />
+      <input class="input" type="number" [(ngModel)]="filters.priceMax" (ngModelChange)="load()" placeholder="Max ₱" aria-label="Maximum price" />
+
+      <select class="input" [(ngModel)]="filters.sortBy" (ngModelChange)="load()" aria-label="Sort by">
+        <option value="">Newest first</option>
         <option value="price">Price</option>
+        <option value="year">Year</option>
         <option value="mileage">Mileage</option>
       </select>
+
+      <select class="input" [(ngModel)]="filters.sortOrder" (ngModelChange)="load()" aria-label="Sort direction">
+        <option value="DESC">Descending</option>
+        <option value="ASC">Ascending</option>
+      </select>
+
+      @if (hasFilters) {
+        <button class="btn btn-ghost btn-sm f-reset" (click)="resetFilters()">Clear filters</button>
+      }
     </div>
-    <button (click)="resetFilters()" class="reset-btn">Reset Filters</button>
   </div>
 
-  <!-- Cars grid -->
+  <!-- ═══════════════ CONTENT ═══════════════ -->
   @if (loading()) {
-    <div class="loading">Loading...</div>
-  } @else {
-    <div class="cars-grid">
+    <div class="grid">
+      @for (s of [0,1,2,3,4,5]; track s) { <div class="skeleton sk-card"></div> }
+    </div>
+  } @else if (!cars().length) {
+    <div class="empty card">
+      <span class="empty-ico" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 17V12l2-5h10l2 5v5M3 17h18" /><circle cx="7.5" cy="17" r="2" /><circle cx="16.5" cy="17" r="2" />
+        </svg>
+      </span>
+      <h2 class="empty-title">
+        @if (hasFilters) { No vehicles match those filters }
+        @else { No vehicles yet }
+      </h2>
+      <p class="empty-body">
+        @if (hasFilters) { Try clearing a filter or two. }
+        @else { Add your first vehicle to get the storefront going. }
+      </p>
+      @if (hasFilters) {
+        <button class="btn btn-primary" (click)="resetFilters()">Clear filters</button>
+      } @else {
+        <a routerLink="/admin/cars/new" class="btn btn-primary">Add vehicle</a>
+      }
+    </div>
+  } @else if (view() === 'grid') {
+
+    <!-- Grid view -->
+    <div class="grid">
       @for (car of cars(); track car.id) {
-        <div class="car-card glass-card">
-          <div class="car-photo">
-            @if (photoUrl(car.photo)) {
-              <img [src]="photoUrl(car.photo)!" [alt]="car.model" />
-            } @else {
-              <div class="photo-placeholder">🚗</div>
-            }
-            <span class="badge badge-{{ car.status }} card-badge">{{ car.status }}</span>
+        <article class="ac card">
+          <div class="ac-media">
+            <a [routerLink]="['/admin/cars', car.id]" class="ac-img-link">
+              <img [src]="photoUrl(car.photo)" [alt]="carTitle(car)" class="ac-img" (error)="onImgError($event)" loading="lazy" />
+            </a>
+            <span class="badge badge-{{ car.status }} ac-status">{{ car.status }}</span>
+            <button
+              class="ac-star"
+              [class.on]="car.featured"
+              (click)="toggleFeatured(car)"
+              [attr.aria-pressed]="car.featured"
+              [title]="car.featured ? 'Remove from featured' : 'Mark as featured'"
+            >
+              <svg viewBox="0 0 24 24" [attr.fill]="car.featured ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="1.8">
+                <path d="M12 3l2.8 5.7 6.2.9-4.5 4.4 1 6.2-5.5-2.9-5.5 2.9 1-6.2L3 9.6l6.2-.9L12 3z" stroke-linejoin="round" />
+              </svg>
+            </button>
           </div>
-          <div class="car-body">
-            <h3 class="car-name">{{ car.make?.name }} {{ car.model }}</h3>
-            <p class="car-meta">{{ car.year }} · {{ car.color }} · {{ car.mileage | number }} km</p>
-            <p class="car-price">{{ formatPrice(+car.price) }}</p>
-            @if (car.vin) { <p class="car-vin">VIN: {{ car.vin }}</p> }
-            <div class="car-actions">
-              <a [routerLink]="['/admin/cars', car.id]" class="action-btn view">View</a>
-              <a [routerLink]="['/admin/cars', car.id, 'edit']" class="action-btn edit">Edit</a>
-              @if (car.status !== 'sold') {
-                <button (click)="markSold(car.id)" class="action-btn sold">Sold</button>
-              }
-              <button (click)="deleteCar(car.id)" class="action-btn delete">Delete</button>
+
+          <div class="ac-body">
+            <a [routerLink]="['/admin/cars', car.id]" class="ac-name">
+              {{ car.make?.name }} {{ car.model }}
+            </a>
+            <p class="ac-meta">
+              {{ car.year }}
+              @if (car.color) { · {{ car.color }} }
+              · {{ car.mileage | number }} km
+              @if (car.transmission) { · {{ humanize(car.transmission) }} }
+            </p>
+            <p class="ac-price">{{ fmtPrice(car.price) }}</p>
+
+            <div class="ac-foot">
+              <select
+                class="input ac-select"
+                [ngModel]="car.status"
+                (ngModelChange)="setStatus(car, $event)"
+                [attr.aria-label]="'Status for ' + carTitle(car)"
+              >
+                @for (s of statuses; track s) { <option [value]="s">{{ humanize(s) }}</option> }
+              </select>
+
+              <div class="ac-actions">
+                <a [routerLink]="['/admin/cars', car.id, 'edit']" class="act" title="Edit" aria-label="Edit">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4 12.5-12.5z" />
+                  </svg>
+                </a>
+                <button class="act act-del" (click)="remove(car)" title="Delete" aria-label="Delete">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 6h18M8 6V4h8v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
+                  </svg>
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      } @empty {
-        <div class="empty-state">
-          <p>🚗 No cars found matching your filters.</p>
-          <button (click)="resetFilters()" class="btn-primary">Clear Filters</button>
-        </div>
+        </article>
       }
+    </div>
+
+  } @else {
+
+    <!-- Table view -->
+    <div class="card table-card">
+      <div class="table-scroll">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Vehicle</th>
+              <th>Year</th>
+              <th>Mileage</th>
+              <th>Price</th>
+              <th>Status</th>
+              <th class="th-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (car of cars(); track car.id) {
+              <tr>
+                <td>
+                  <a [routerLink]="['/admin/cars', car.id]" class="cell-car">
+                    <img [src]="photoUrl(car.photo)" [alt]="" class="cell-thumb" (error)="onImgError($event)" loading="lazy" />
+                    <span class="cell-text">
+                      <span class="cell-title">
+                        {{ car.make?.name }} {{ car.model }}
+                        @if (car.featured) { <span class="mini-star" title="Featured">★</span> }
+                      </span>
+                      @if (car.vin) { <span class="cell-sub">VIN {{ car.vin }}</span> }
+                    </span>
+                  </a>
+                </td>
+                <td>{{ car.year }}</td>
+                <td>{{ car.mileage | number }} km</td>
+                <td class="cell-price">{{ fmtPrice(car.price) }}</td>
+                <td>
+                  <select
+                    class="input ac-select"
+                    [ngModel]="car.status"
+                    (ngModelChange)="setStatus(car, $event)"
+                    [attr.aria-label]="'Status for ' + carTitle(car)"
+                  >
+                    @for (s of statuses; track s) { <option [value]="s">{{ humanize(s) }}</option> }
+                  </select>
+                </td>
+                <td>
+                  <div class="ac-actions th-right-actions">
+                    <button
+                      class="act"
+                      [class.on]="car.featured"
+                      (click)="toggleFeatured(car)"
+                      title="Toggle featured"
+                      aria-label="Toggle featured"
+                    >
+                      <svg viewBox="0 0 24 24" [attr.fill]="car.featured ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="1.8">
+                        <path d="M12 3l2.8 5.7 6.2.9-4.5 4.4 1 6.2-5.5-2.9-5.5 2.9 1-6.2L3 9.6l6.2-.9L12 3z" stroke-linejoin="round" />
+                      </svg>
+                    </button>
+                    <a [routerLink]="['/admin/cars', car.id, 'edit']" class="act" title="Edit" aria-label="Edit">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4 12.5-12.5z" />
+                      </svg>
+                    </a>
+                    <button class="act act-del" (click)="remove(car)" title="Delete" aria-label="Delete">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 6h18M8 6V4h8v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
+                      </svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
     </div>
   }
 </div>

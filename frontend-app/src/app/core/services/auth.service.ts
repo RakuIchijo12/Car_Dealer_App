@@ -1,50 +1,75 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { AuthResponse, User } from '../models';
 
+const TOKEN_KEY = 'velora_token';
+const USER_KEY = 'velora_user';
+
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private readonly TOKEN_KEY = 'dealeros_token';
-  private readonly USER_KEY = 'dealeros_user';
+  private http = inject(HttpClient);
+  private router = inject(Router);
 
-  currentUser = signal<User | null>(this.loadUser());
-
-  constructor(private http: HttpClient, private router: Router) {}
+  readonly currentUser = signal<User | null>(readUser());
+  readonly isAuthenticated = computed(() => this.currentUser() !== null);
+  readonly initials = computed(() => {
+    const name = this.currentUser()?.name?.trim();
+    if (!name) return 'U';
+    return name
+      .split(/\s+/)
+      .slice(0, 2)
+      .map((p) => p[0]?.toUpperCase() ?? '')
+      .join('');
+  });
 
   login(email: string, password: string) {
-    return this.http.post<AuthResponse>(`${environment.apiUrl}/auth/login`, { email, password }).pipe(
-      tap((res) => {
-        localStorage.setItem(this.TOKEN_KEY, res.access_token);
-        localStorage.setItem(this.USER_KEY, JSON.stringify(res.user));
-        this.currentUser.set(res.user);
-      }),
-    );
+    return this.http
+      .post<AuthResponse>(`${environment.apiUrl}/auth/login`, { email, password })
+      .pipe(
+        tap((res) => {
+          safeSet(TOKEN_KEY, res.access_token);
+          safeSet(USER_KEY, JSON.stringify(res.user));
+          this.currentUser.set(res.user);
+        }),
+      );
   }
 
-  logout() {
-    localStorage.removeItem(this.TOKEN_KEY);
-    localStorage.removeItem(this.USER_KEY);
+  logout(redirectTo: string = '/') {
+    safeRemove(TOKEN_KEY);
+    safeRemove(USER_KEY);
     this.currentUser.set(null);
-    this.router.navigate(['/']);
+    void this.router.navigateByUrl(redirectTo);
   }
 
   getToken(): string | null {
-    return localStorage.getItem(this.TOKEN_KEY);
+    try {
+      return localStorage.getItem(TOKEN_KEY);
+    } catch {
+      return null;
+    }
   }
 
   isLoggedIn(): boolean {
     return !!this.getToken();
   }
+}
 
-  private loadUser(): User | null {
-    try {
-      const u = localStorage.getItem(this.USER_KEY);
-      return u ? JSON.parse(u) : null;
-    } catch {
-      return null;
-    }
+function readUser(): User | null {
+  try {
+    const raw = localStorage.getItem(USER_KEY);
+    return raw ? (JSON.parse(raw) as User) : null;
+  } catch {
+    return null;
   }
+}
+
+function safeSet(key: string, value: string) {
+  try { localStorage.setItem(key, value); } catch { /* storage blocked */ }
+}
+
+function safeRemove(key: string) {
+  try { localStorage.removeItem(key); } catch { /* storage blocked */ }
 }

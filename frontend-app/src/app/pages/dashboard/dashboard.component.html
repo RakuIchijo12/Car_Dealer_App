@@ -1,81 +1,247 @@
 <div class="page">
-  <h1 class="page-title">Dashboard</h1>
-  <p class="page-sub">Welcome back — here's what's happening in your dealership.</p>
 
-  <!-- Stats grid -->
-  @if (stats()) {
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-icon blue">🚗</div>
-        <div class="stat-info">
-          <p class="stat-value">{{ stats()!.total }}</p>
-          <p class="stat-label">Total Cars</p>
-        </div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon green">✅</div>
-        <div class="stat-info">
-          <p class="stat-value">{{ stats()!.available }}</p>
-          <p class="stat-label">Available</p>
-        </div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon red">🔴</div>
-        <div class="stat-info">
-          <p class="stat-value">{{ stats()!.sold }}</p>
-          <p class="stat-label">Sold</p>
-        </div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon yellow">⏳</div>
-        <div class="stat-info">
-          <p class="stat-value">{{ stats()!.reserved }}</p>
-          <p class="stat-label">Reserved</p>
-        </div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon purple">🏭</div>
-        <div class="stat-info">
-          <p class="stat-value">{{ stats()!.totalMakes }}</p>
-          <p class="stat-label">Makes</p>
-        </div>
-      </div>
+  <header class="page-head">
+    <div>
+      <h1 class="page-title">{{ greeting }}, {{ auth.currentUser()?.name }}</h1>
+      <p class="page-sub">Here's how the lot is looking today.</p>
     </div>
-  }
+    <a routerLink="/admin/cars/new" class="btn btn-primary">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true">
+        <path d="M12 5v14M5 12h14" stroke-linecap="round" />
+      </svg>
+      Add vehicle
+    </a>
+  </header>
 
-  <!-- Recent activity -->
-  <div class="section">
-    <div class="section-header">
-      <h2 class="section-title">Recent Inventory</h2>
-      <a routerLink="/admin/cars" class="see-all">See all →</a>
+  @if (loading()) {
+    <div class="kpis">
+      @for (s of [0,1,2,3]; track s) { <div class="skeleton sk-kpi"></div> }
     </div>
-    <div class="glass-card">
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th>Car</th>
-            <th>Year</th>
-            <th>Price</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (car of recent(); track car.id) {
-            <tr>
-              <td>
-                <a [routerLink]="['/admin/cars', car.id]" class="car-link">
-                  {{ car.make?.name }} {{ car.model }}
-                </a>
-              </td>
-              <td>{{ car.year }}</td>
-              <td>{{ formatPrice(+car.price) }}</td>
-              <td><span class="badge badge-{{ car.status }}">{{ car.status }}</span></td>
-            </tr>
-          } @empty {
-            <tr><td colspan="4" class="empty-row">No recent cars</td></tr>
+    <div class="skeleton sk-panel"></div>
+  } @else if (stats(); as s) {
+
+    <!-- ═══════════════ KPIs ═══════════════ -->
+    <section class="kpis">
+      <article class="kpi card">
+        <span class="kpi-ico ic-amber" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 17V12l2-5h10l2 5v5M3 17h18" /><circle cx="7.5" cy="17" r="2" /><circle cx="16.5" cy="17" r="2" />
+          </svg>
+        </span>
+        <span class="kpi-label">Total vehicles</span>
+        <span class="kpi-value">{{ s.total }}</span>
+        <span class="kpi-foot">{{ s.available }} available · {{ s.reserved }} reserved</span>
+      </article>
+
+      <article class="kpi card">
+        <span class="kpi-ico ic-green" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 17l6-6 4 4 8-8" /><path d="M21 7v5h-5" />
+          </svg>
+        </span>
+        <span class="kpi-label">Stock value</span>
+        <span class="kpi-value">{{ fmtShort(s.inventoryValue) }}</span>
+        <span class="kpi-foot">Avg {{ fmtShort(s.averagePrice) }} per unit</span>
+      </article>
+
+      <article class="kpi card">
+        <span class="kpi-ico ic-violet" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 12h5l2 3h4l2-3h5" /><path d="M5 5h14l2 7v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5z" />
+          </svg>
+        </span>
+        <span class="kpi-label">Open leads</span>
+        <span class="kpi-value">{{ (leadStats()?.new ?? 0) + (leadStats()?.contacted ?? 0) + (leadStats()?.negotiating ?? 0) }}</span>
+        <span class="kpi-foot">
+          @if (leadStats()?.new) { <span class="kpi-alert">{{ leadStats()!.new }} awaiting first contact</span> }
+          @else { All leads actioned }
+        </span>
+      </article>
+
+      <article class="kpi card">
+        <span class="kpi-ico ic-blue" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1.1 1L12 21l7.7-7.6 1.1-1a5.5 5.5 0 000-7.8z" />
+          </svg>
+        </span>
+        <span class="kpi-label">Units sold</span>
+        <span class="kpi-value">{{ s.sold }}</span>
+        <span class="kpi-foot">{{ fmtShort(s.soldValue) }} lifetime revenue</span>
+      </article>
+    </section>
+
+    <!-- ═══════════════ CHARTS ═══════════════ -->
+    <section class="charts">
+
+      <!-- Status donut -->
+      <article class="panel card">
+        <header class="panel-head">
+          <h2 class="panel-title">Inventory status</h2>
+        </header>
+        <div class="donut-wrap">
+          <div class="donut" [style.background]="donutGradient()">
+            <div class="donut-hole">
+              <span class="donut-n">{{ s.total }}</span>
+              <span class="donut-l">units</span>
+            </div>
+          </div>
+          <ul class="legend">
+            @for (slice of statusSlices(); track slice.label) {
+              <li class="legend-item">
+                <span class="legend-dot" [style.background]="slice.color"></span>
+                <span class="legend-label">{{ slice.label }}</span>
+                <span class="legend-value">{{ slice.value }}</span>
+                <span class="legend-pct">{{ slice.pct | number: '1.0-0' }}%</span>
+              </li>
+            }
+          </ul>
+        </div>
+      </article>
+
+      <!-- Brand bars -->
+      <article class="panel card">
+        <header class="panel-head">
+          <h2 class="panel-title">Stock by brand</h2>
+          <a routerLink="/admin/makes" class="panel-link">Manage brands →</a>
+        </header>
+        @if (makeBars().length) {
+          <ul class="bars">
+            @for (m of makeBars(); track m.name) {
+              <li class="bar-row">
+                <span class="bar-label">{{ m.name }}</span>
+                <span class="bar-track">
+                  <span class="bar-fill" [style.width.%]="m.pct"></span>
+                </span>
+                <span class="bar-value">{{ m.count }}</span>
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="panel-empty">No vehicles assigned to a brand yet.</p>
+        }
+      </article>
+
+      <!-- Lead pipeline -->
+      <article class="panel card">
+        <header class="panel-head">
+          <h2 class="panel-title">Lead pipeline</h2>
+          <a routerLink="/admin/leads" class="panel-link">Open leads →</a>
+        </header>
+        @if (leadStats(); as l) {
+          <div class="pipeline">
+            @for (stage of leadPipeline(); track stage.key) {
+              <a
+                [routerLink]="['/admin/leads']"
+                [queryParams]="{ status: stage.key }"
+                class="stage"
+              >
+                <span class="stage-n">{{ stage.value }}</span>
+                <span class="badge badge-{{ stage.key }} stage-badge">{{ stage.label }}</span>
+              </a>
+            }
+          </div>
+          <p class="pipeline-total">{{ l.total }} total enquiries received</p>
+        } @else {
+          <p class="panel-empty">No enquiries yet.</p>
+        }
+      </article>
+    </section>
+
+    <!-- ═══════════════ TABLES ═══════════════ -->
+    <section class="tables">
+
+      <!-- Recent inventory -->
+      <article class="panel card">
+        <header class="panel-head">
+          <h2 class="panel-title">Recently added</h2>
+          <a routerLink="/admin/cars" class="panel-link">All inventory →</a>
+        </header>
+        <div class="table-scroll">
+          <table class="table">
+            <thead>
+              <tr><th>Vehicle</th><th>Price</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+              @for (car of recent(); track car.id) {
+                <tr>
+                  <td>
+                    <a [routerLink]="['/admin/cars', car.id]" class="cell-car">
+                      <img [src]="photoUrl(car.photo)" [alt]="" class="cell-thumb" (error)="onImgError($event)" />
+                      <span class="cell-car-text">
+                        <span class="cell-title">{{ car.make?.name }} {{ car.model }}</span>
+                        <span class="cell-sub">{{ car.year }} · {{ car.mileage | number }} km</span>
+                      </span>
+                    </a>
+                  </td>
+                  <td class="cell-price">{{ fmtPrice(car.price) }}</td>
+                  <td><span class="badge badge-{{ car.status }}">{{ car.status }}</span></td>
+                </tr>
+              } @empty {
+                <tr><td colspan="3" class="cell-empty">No vehicles yet</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </article>
+
+      <!-- Recent leads -->
+      <article class="panel card">
+        <header class="panel-head">
+          <h2 class="panel-title">Latest enquiries</h2>
+          <a routerLink="/admin/leads" class="panel-link">All leads →</a>
+        </header>
+        <div class="table-scroll">
+          <table class="table">
+            <thead>
+              <tr><th>Customer</th><th>Interest</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+              @for (lead of recentLeads(); track lead.id) {
+                <tr>
+                  <td>
+                    <span class="cell-title">{{ lead.name }}</span>
+                    <span class="cell-sub">{{ lead.phone }} · {{ timeAgo(lead.createdAt) }}</span>
+                  </td>
+                  <td>
+                    @if (lead.car) {
+                      <span class="cell-sub">{{ carTitle(lead.car) }}</span>
+                    } @else {
+                      <span class="cell-sub">{{ humanize(lead.type) }}</span>
+                    }
+                  </td>
+                  <td><span class="badge badge-{{ lead.status }}">{{ lead.status }}</span></td>
+                </tr>
+              } @empty {
+                <tr><td colspan="3" class="cell-empty">No enquiries yet</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </article>
+    </section>
+
+    <!-- Most viewed -->
+    @if (s.mostViewed.length) {
+      <section class="panel card">
+        <header class="panel-head">
+          <h2 class="panel-title">Most viewed listings</h2>
+          <span class="panel-note">Storefront page views</span>
+        </header>
+        <ul class="viewed">
+          @for (car of s.mostViewed; track car.id) {
+            <li class="viewed-item">
+              <a [routerLink]="['/admin/cars', car.id]" class="viewed-link">
+                <img [src]="photoUrl(car.photo)" [alt]="" class="viewed-thumb" (error)="onImgError($event)" />
+                <span class="viewed-text">
+                  <span class="cell-title">{{ car.make?.name }} {{ car.model }}</span>
+                  <span class="cell-sub">{{ car.year }} · {{ fmtPrice(car.price) }}</span>
+                </span>
+                <span class="viewed-count">{{ car.views ?? 0 }} views</span>
+              </a>
+            </li>
           }
-        </tbody>
-      </table>
-    </div>
-  </div>
+        </ul>
+      </section>
+    }
+  }
 </div>

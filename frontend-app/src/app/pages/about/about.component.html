@@ -1,0 +1,158 @@
+<app-public-nav />
+
+<main class="ab">
+
+  <header class="ab-hero">
+    <div class="aurora" aria-hidden="true"></div>
+    <div class="grid-lines" aria-hidden="true"></div>
+    <div class="wrap wrap-wide ab-hero-inner">
+      <span class="eyebrow">About {{ brand.name }}</span>
+      <h1 class="t-display ab-title">
+        We only sell cars<br /><span class="t-grad">we'd drive ourselves.</span>
+      </h1>
+      <p class="t-lead ab-sub">
+        {{ brand.legalName }} has been serving {{ brand.contact.city }} and the wider Davao Region
+        since {{ brand.founded }}. We're a small team that got tired of how pre-owned
+        car buying usually goes — so we built the dealership we wanted to buy from.
+      </p>
+    </div>
+  </header>
+
+  <!-- Stats -->
+  @if (stats(); as s) {
+    <section class="ab-stats-section">
+      <div class="wrap wrap-wide">
+        <div class="ab-stats" appReveal>
+          <div class="ab-stat">
+            <span class="ab-stat-n">{{ yearsTrading }}</span>
+            <span class="ab-stat-l">Years trading</span>
+          </div>
+          <div class="ab-stat">
+            <span class="ab-stat-n">{{ s.sold }}+</span>
+            <span class="ab-stat-l">Cars handed over</span>
+          </div>
+          <div class="ab-stat">
+            <span class="ab-stat-n">{{ s.available }}</span>
+            <span class="ab-stat-l">Units in stock</span>
+          </div>
+          <div class="ab-stat">
+            <span class="ab-stat-n">60</span>
+            <span class="ab-stat-l">Inspection points</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  }
+
+  <!-- Story -->
+  <section class="section story">
+    <div class="wrap wrap-wide story-grid">
+      <div class="story-copy" appReveal>
+        <span class="eyebrow">Our story</span>
+        <h2 class="t-h1 story-title">Started with one bad<br />buying experience.</h2>
+      </div>
+      <div class="story-body" appReveal>
+        <p>
+          In {{ brand.founded }} one of our founders bought a used SUV that looked immaculate.
+          Three months later the transmission went, and the "complete papers" turned out to
+          be missing an encumbrance release. The dealer stopped answering calls.
+        </p>
+        <p>
+          That's a common enough story in the Philippines that most buyers just accept the risk.
+          We didn't want to. {{ brand.name }} started as a small lot with four units and one
+          non-negotiable rule: <strong>if we wouldn't put a family member in it, we don't sell it.</strong>
+        </p>
+        <p>
+          Today we carry {{ stats()?.available ?? 'dozens of' }} inspected units across
+          {{ stats()?.makes ?? 'several' }} brands, and that rule hasn't changed. Roughly a third
+          of the cars we appraise get rejected outright. It makes our stock smaller. It also
+          means you can buy from us without holding your breath.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Values -->
+  <section class="section values-section">
+    <div class="wrap wrap-wide">
+      <div class="sec-head" appReveal>
+        <span class="eyebrow">How we operate</span>
+        <h2 class="t-h2 sec-title">Three things we won't budge on</h2>
+      </div>
+      <div class="values">
+        @for (v of values; track v.title; let i = $index) {
+          <article class="value card" [appReveal]="i * 80">
+            <span class="value-n" aria-hidden="true">0{{ i + 1 }}</span>
+            <h3 class="value-title">{{ v.title }}</h3>
+            <p class="value-body">{{ v.body }}</p>
+          </article>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Inspection -->
+  <section class="section insp-section">
+    <div class="aurora" aria-hidden="true"></div>
+    <div class="wrap wrap-wide insp-inner">
+      <div class="insp-head" appReveal>
+        <span class="eyebrow">The 60-point check</span>
+        <h2 class="t-h1 insp-title">What we look at<br />before anything gets listed.</h2>
+        <p class="t-lead insp-sub">
+          Every unit goes through the same checklist, run by our own technicians —
+          not the seller's. Anything that fails either gets fixed properly or the
+          car doesn't get listed.
+        </p>
+        <a routerLink="/inventory" class="btn btn-primary">See what passed</a>
+      </div>
+
+      <div class="insp-list">
+        @for (group of inspection; track group.area; let i = $index) {
+          <details class="insp-group card" [appReveal]="i * 60" [open]="i === 0">
+            <summary class="insp-summary">
+              <span class="insp-area">{{ group.area }}</span>
+              <span class="insp-count">{{ group.count }} checks</span>
+              <span class="insp-chev" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </span>
+            </summary>
+            <ul class="insp-items">
+              @for (item of group.items; track item) {
+                <li>
+                  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true">
+                    <path d="M4 10.5l4 4 8-9" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                  {{ item }}
+                </li>
+              }
+            </ul>
+          </details>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section">
+    <div class="wrap wrap-wide">
+      <div class="cta card" appReveal>
+        <div class="aurora" aria-hidden="true"></div>
+        <div class="cta-body">
+          <h2 class="t-h1 cta-title">Come judge for yourself.</h2>
+          <p class="t-lead cta-sub">
+            Drop by the lot on {{ brand.contact.address }}, or start with the listings online.
+            Bring your own mechanic if you like — we mean it.
+          </p>
+          <div class="cta-actions">
+            <a routerLink="/inventory" class="btn btn-primary btn-lg">Browse inventory</a>
+            <a routerLink="/contact" class="btn btn-ghost btn-lg">Book a visit</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<app-public-footer />

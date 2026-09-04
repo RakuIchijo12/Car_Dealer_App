@@ -5,6 +5,7 @@ import { AuthModule } from './auth/auth.module';
 import { CarsModule } from './cars/cars.module';
 import { MakesModule } from './makes/makes.module';
 import { CustomersModule } from './customers/customers.module';
+import { LeadsModule } from './leads/leads.module';
 import { PublicModule } from './public/public.module';
 
 @Module({
@@ -15,6 +16,7 @@ import { PublicModule } from './public/public.module';
     CarsModule,
     MakesModule,
     CustomersModule,
+    LeadsModule,
     PublicModule,
   ],
 })

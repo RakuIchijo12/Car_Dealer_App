@@ -1,64 +1,146 @@
 <div class="page">
-  @if (car()) {
-    <div class="page-header">
-      <a routerLink="/admin/cars" class="back-link">← Back to Cars</a>
-      <a [routerLink]="['/admin/cars', car()!.id, 'edit']" class="btn-primary">Edit Car</a>
-    </div>
 
-    <div class="detail-layout">
-      <!-- Photo -->
-      <div class="photo-section glass-card">
-        @if (car()!.photo) {
-          <img [src]="photoUrl(car()!.photo!)" [alt]="car()!.model" class="car-photo" />
-        } @else {
-          <div class="photo-placeholder">🚗</div>
+  @if (loading()) {
+    <div class="skeleton sk-page"></div>
+  } @else if (car(); as c) {
+
+    <header class="page-head">
+      <div>
+        <a routerLink="/admin/cars" class="back">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+            <path d="M19 12H5M11 18l-6-6 6-6" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          Back to inventory
+        </a>
+        <h1 class="page-title">{{ title }}</h1>
+        <div class="head-tags">
+          <span class="badge badge-{{ c.status }}">{{ c.status }}</span>
+          @if (c.featured) { <span class="badge badge-featured">Featured</span> }
+          <span class="head-views">{{ c.views ?? 0 }} storefront views</span>
+        </div>
+      </div>
+
+      <div class="head-actions">
+        <a [routerLink]="['/vehicle', c.id]" class="btn btn-ghost btn-sm" title="Open the public listing">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
+            <path d="M15 3h6v6M10 14L21 3M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          View public page
+        </a>
+        <a [routerLink]="['/admin/cars', c.id, 'edit']" class="btn btn-primary btn-sm">Edit vehicle</a>
+      </div>
+    </header>
+
+    <div class="detail-grid">
+
+      <!-- ── Media + specs ── -->
+      <div class="col-main">
+        <section class="card gal-card">
+          <img
+            [src]="gallery()[activeImage()]"
+            [alt]="title"
+            class="gal-main"
+            (error)="onImgError($event)"
+          />
+          @if (gallery().length > 1) {
+            <div class="gal-thumbs no-scrollbar">
+              @for (img of gallery(); track img; let i = $index) {
+                <button
+                  class="gal-thumb"
+                  [class.active]="i === activeImage()"
+                  (click)="activeImage.set(i)"
+                  [attr.aria-label]="'View photo ' + (i + 1)"
+                >
+                  <img [src]="img" alt="" (error)="onImgError($event)" />
+                </button>
+              }
+            </div>
+          }
+        </section>
+
+        <section class="card sect">
+          <h2 class="sect-title">Specifications</h2>
+          <dl class="spec-grid">
+            @for (s of specs; track s.label) {
+              <div class="spec">
+                <dt class="spec-label">{{ s.label }}</dt>
+                <dd class="spec-value">{{ s.value }}</dd>
+              </div>
+            }
+          </dl>
+        </section>
+
+        @if (c.description) {
+          <section class="card sect">
+            <h2 class="sect-title">Listing description</h2>
+            <p class="desc">{{ c.description }}</p>
+          </section>
+        }
+
+        @if (c.features?.length) {
+          <section class="card sect">
+            <h2 class="sect-title">Features</h2>
+            <ul class="feats">
+              @for (f of c.features; track f) {
+                <li>
+                  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true">
+                    <path d="M4 10.5l4 4 8-9" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                  {{ f }}
+                </li>
+              }
+            </ul>
+          </section>
         }
       </div>
 
-      <!-- Info -->
-      <div class="info-section">
-        <div class="glass-card info-card">
-          <div class="title-row">
-            <h1 class="car-title">{{ car()!.make?.name }} {{ car()!.model }}</h1>
-            <span class="badge badge-{{ car()!.status }}">{{ car()!.status }}</span>
-          </div>
-          <p class="car-price">{{ formatPrice(+car()!.price) }}</p>
+      <!-- ── Side ── -->
+      <aside class="col-side">
+        <section class="card sect price-card">
+          @if (c.originalPrice) {
+            <span class="price-was">{{ fmtPrice(c.originalPrice) }}</span>
+          }
+          <span class="price-now">{{ fmtPrice(c.price) }}</span>
+          <p class="price-meta">
+            {{ c.year }} · {{ c.mileage | number }} km
+            @if (c.color) { · {{ c.color }} }
+          </p>
+        </section>
 
-          <div class="details-grid">
-            <div class="detail-item">
-              <span class="detail-label">Year</span>
-              <span class="detail-value">{{ car()!.year }}</span>
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">Color</span>
-              <span class="detail-value">{{ car()!.color || '—' }}</span>
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">Mileage</span>
-              <span class="detail-value">{{ car()!.mileage | number }} km</span>
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">Make</span>
-              <span class="detail-value">{{ car()!.make?.name || '—' }}</span>
-            </div>
-            @if (car()!.vin) {
-              <div class="detail-item full">
-                <span class="detail-label">VIN</span>
-                <span class="detail-value mono">{{ car()!.vin }}</span>
-              </div>
+        <section class="card sect">
+          <h2 class="sect-title">Status</h2>
+          <div class="status-pills">
+            @for (s of statuses; track s) {
+              <button
+                class="pill"
+                [class.active]="c.status === s"
+                (click)="setStatus(s)"
+              >{{ humanize(s) }}</button>
             }
           </div>
+        </section>
 
-          @if (car()!.description) {
-            <div class="description">
-              <h3 class="desc-title">Notes</h3>
-              <p class="desc-text">{{ car()!.description }}</p>
-            </div>
-          }
-        </div>
-      </div>
+        <section class="card sect">
+          <h2 class="sect-title">Visibility</h2>
+          <button
+            class="btn btn-block"
+            [class.btn-primary]="c.featured"
+            [class.btn-ghost]="!c.featured"
+            (click)="toggleFeatured()"
+          >
+            <svg viewBox="0 0 24 24" [attr.fill]="c.featured ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+              <path d="M12 3l2.8 5.7 6.2.9-4.5 4.4 1 6.2-5.5-2.9-5.5 2.9 1-6.2L3 9.6l6.2-.9L12 3z" stroke-linejoin="round" />
+            </svg>
+            {{ c.featured ? 'Featured on homepage' : 'Feature on homepage' }}
+          </button>
+        </section>
+
+        <section class="card sect danger">
+          <h2 class="sect-title">Danger zone</h2>
+          <p class="danger-note">Deleting removes the listing and every uploaded photo. This cannot be undone.</p>
+          <button class="btn btn-danger btn-block" (click)="remove()">Delete vehicle</button>
+        </section>
+      </aside>
     </div>
-  } @else {
-    <div class="loading">Loading...</div>
   }
 </div>

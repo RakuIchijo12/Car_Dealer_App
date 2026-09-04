@@ -1,76 +1,108 @@
-<div class="login-page">
-  <!-- Background car silhouette -->
-  <div class="car-silhouette" aria-hidden="true">
-    <svg viewBox="0 0 800 300" xmlns="http://www.w3.org/2000/svg" fill="none">
-      <path d="M80 220 L80 180 C80 160 100 130 130 120 L200 100 L300 75 C330 68 380 65 420 65 L520 65 C560 65 610 68 640 80 L700 100 L730 120 C750 130 760 150 760 170 L760 220 Z" fill="#DC2626" opacity="0.06"/>
-      <ellipse cx="180" cy="222" rx="45" ry="45" fill="#DC2626" opacity="0.05"/>
-      <ellipse cx="640" cy="222" rx="45" ry="45" fill="#DC2626" opacity="0.05"/>
-      <path d="M220 120 L280 80 L480 80 L560 120 Z" fill="#DC2626" opacity="0.04"/>
-    </svg>
-  </div>
+<div class="login">
+  <div class="aurora" aria-hidden="true"></div>
+  <div class="grid-lines" aria-hidden="true"></div>
 
-  <!-- Radial spotlight -->
-  <div class="spotlight" aria-hidden="true"></div>
+  <!-- Ambient car silhouette -->
+  <svg class="silhouette" viewBox="0 0 800 300" fill="none" aria-hidden="true">
+    <path d="M80 220 L80 180 C80 160 100 130 130 120 L200 100 L300 75 C330 68 380 65 420 65 L520 65 C560 65 610 68 640 80 L700 100 L730 120 C750 130 760 150 760 170 L760 220 Z" fill="#FF9420" opacity="0.045" />
+    <circle cx="180" cy="222" r="45" fill="#FF9420" opacity="0.04" />
+    <circle cx="640" cy="222" r="45" fill="#FF9420" opacity="0.04" />
+    <path d="M220 120 L280 80 L480 80 L560 120 Z" fill="#FFC24A" opacity="0.035" />
+  </svg>
 
-  <!-- Login card -->
-  <div class="login-card">
-    <!-- Logo -->
-    <div class="logo-area">
-      <span class="logo-icon">🚗</span>
-      <h1 class="logo-text">Dealer<span style="color:#DC2626">OS</span></h1>
-    </div>
-    <p class="tagline">Manage your fleet. Close every deal.</p>
-    <div class="divider"></div>
+  <div class="login-inner">
+    <a routerLink="/" class="brand">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 32 32" fill="none">
+          <defs>
+            <linearGradient id="lg-brand" x1="0" y1="0" x2="32" y2="32">
+              <stop offset="0" stop-color="#FFC24A" />
+              <stop offset="1" stop-color="#FF7A18" />
+            </linearGradient>
+          </defs>
+          <path d="M4 21.5 L11 6 L16 6 L9 21.5 Z" fill="url(#lg-brand)" />
+          <path d="M14 21.5 L21 6 L26 6 L19 21.5 Z" fill="url(#lg-brand)" opacity="0.55" />
+          <rect x="4" y="24" width="22" height="2.5" rx="1.25" fill="url(#lg-brand)" />
+        </svg>
+      </span>
+      <span class="brand-text">{{ brand.name }}<span class="brand-sub">{{ brand.nameSuffix }}</span></span>
+    </a>
 
-    <!-- Form -->
-    <form [formGroup]="form" (ngSubmit)="submit()">
-      <!-- Email -->
-      <div class="field">
-        <label class="field-label">Email</label>
-        <input
-          type="email"
-          formControlName="email"
-          class="input-dark"
-          placeholder="admin@dealeros.com"
-          autocomplete="email"
-        />
-        @if (form.get('email')?.touched && form.get('email')?.invalid) {
-          <span class="field-error">Enter a valid email</span>
-        }
-      </div>
+    <div class="card login-card">
+      <h1 class="login-title">Staff sign in</h1>
+      <p class="login-sub">Manage inventory, leads and customers.</p>
 
-      <!-- Password -->
-      <div class="field">
-        <label class="field-label">Password</label>
-        <div class="password-wrap">
+      <form [formGroup]="form" (ngSubmit)="submit()" class="form">
+        <div class="field">
+          <label class="label" for="l-email">Email</label>
           <input
-            [type]="showPassword() ? 'text' : 'password'"
-            formControlName="password"
-            class="input-dark"
-            placeholder="••••••••"
-            autocomplete="current-password"
+            id="l-email"
+            class="input"
+            [class.invalid]="invalid('email')"
+            formControlName="email"
+            type="email"
+            placeholder="admin@veloramotors.ph"
+            autocomplete="email"
           />
-          <button type="button" class="toggle-pw" (click)="showPassword.set(!showPassword())">
-            {{ showPassword() ? '🙈' : '👁️' }}
-          </button>
+          @if (invalid('email')) { <span class="field-error">Enter a valid email address</span> }
         </div>
-        @if (form.get('password')?.touched && form.get('password')?.invalid) {
-          <span class="field-error">Password required</span>
+
+        <div class="field">
+          <label class="label" for="l-password">Password</label>
+          <div class="pw-wrap">
+            <input
+              id="l-password"
+              class="input"
+              [class.invalid]="invalid('password')"
+              formControlName="password"
+              [type]="showPassword() ? 'text' : 'password'"
+              placeholder="••••••••"
+              autocomplete="current-password"
+            />
+            <button
+              type="button"
+              class="pw-toggle"
+              (click)="showPassword.set(!showPassword())"
+              [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
+            >
+              @if (showPassword()) {
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 3l18 18M10.6 10.7a2 2 0 002.8 2.8" />
+                  <path d="M9.4 5.3A9.5 9.5 0 0112 5c5 0 9 4.5 9 7a11 11 0 01-2.4 3.4M6.3 6.4A11.7 11.7 0 003 12c0 2.5 4 7 9 7a9.6 9.6 0 003.6-.7" />
+                </svg>
+              } @else {
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 12s3.5-7 9-7 9 7 9 7-3.5 7-9 7-9-7-9-7z" />
+                  <circle cx="12" cy="12" r="2.6" />
+                </svg>
+              }
+            </button>
+          </div>
+          @if (invalid('password')) { <span class="field-error">Password is required</span> }
+        </div>
+
+        @if (error()) {
+          <div class="error-banner" role="alert">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <circle cx="10" cy="10" r="8" />
+              <path d="M10 6v5M10 14h.01" stroke-linecap="round" />
+            </svg>
+            {{ error() }}
+          </div>
         }
+
+        <button type="submit" class="btn btn-primary btn-block btn-lg" [disabled]="loading()">
+          @if (loading()) { <span class="spinner"></span> Signing in… }
+          @else { Sign in }
+        </button>
+      </form>
+
+      <div class="hint">
+        <span class="hint-label">Demo account</span>
+        <code class="hint-code">admin&#64;veloramotors.ph / admin123</code>
       </div>
+    </div>
 
-      <!-- Error -->
-      @if (error()) {
-        <div class="error-banner">{{ error() }}</div>
-      }
-
-      <!-- Submit -->
-      <button type="submit" class="btn-primary w-full mt-2" [disabled]="loading()">
-        @if (loading()) { <span class="spinner"></span> Signing in... }
-        @else { Sign In }
-      </button>
-
-      <a href="#" class="forgot-link">Forgot password?</a>
-    </form>
+    <a routerLink="/" class="back-link">← Back to the storefront</a>
   </div>
 </div>

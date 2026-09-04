@@ -1,34 +1,114 @@
-<div class="shell">
-  <!-- Sidebar -->
-  <aside class="sidebar">
-    <div class="sidebar-logo">
-      <span>🚗</span>
-      <span class="logo-name">Dealer<span style="color:#DC2626">OS</span></span>
+<div class="shell" [class.collapsed]="collapsed()">
+
+  <!-- ═══════════════ SIDEBAR ═══════════════ -->
+  <aside class="sidebar" [class.mobile-open]="mobileOpen()">
+
+    <div class="sb-top">
+      <a routerLink="/" class="sb-logo" title="Back to storefront">
+        <span class="sb-mark" aria-hidden="true">
+          <svg viewBox="0 0 32 32" fill="none">
+            <defs>
+              <linearGradient id="svg-brand" x1="0" y1="0" x2="32" y2="32">
+                <stop offset="0" stop-color="#FFC24A" />
+                <stop offset="1" stop-color="#FF7A18" />
+              </linearGradient>
+            </defs>
+            <path d="M4 21.5 L11 6 L16 6 L9 21.5 Z" fill="url(#svg-brand)" />
+            <path d="M14 21.5 L21 6 L26 6 L19 21.5 Z" fill="url(#svg-brand)" opacity="0.55" />
+            <rect x="4" y="24" width="22" height="2.5" rx="1.25" fill="url(#svg-brand)" />
+          </svg>
+        </span>
+        <span class="sb-name">{{ brand.name }}<span class="sb-sub">Admin</span></span>
+      </a>
+
+      <button class="sb-collapse" (click)="toggleCollapse()" [attr.aria-label]="collapsed() ? 'Expand sidebar' : 'Collapse sidebar'">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M15 18l-6-6 6-6" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </button>
     </div>
 
-    <nav class="sidebar-nav">
+    <nav class="sb-nav">
       @for (item of navItems; track item.route) {
-        <a [routerLink]="item.route" routerLinkActive="nav-active" class="nav-item">
-          <span class="nav-icon">{{ item.icon }}</span>
-          <span class="nav-label">{{ item.label }}</span>
+        <a
+          [routerLink]="item.route"
+          routerLinkActive="active"
+          class="sb-item"
+          [title]="item.label"
+          (click)="closeMobile()"
+        >
+          <span class="sb-ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              @switch (item.icon) {
+                @case ('grid') { <rect x="3" y="3" width="7" height="7" rx="1.5" /><rect x="14" y="3" width="7" height="7" rx="1.5" /><rect x="3" y="14" width="7" height="7" rx="1.5" /><rect x="14" y="14" width="7" height="7" rx="1.5" /> }
+                @case ('car') { <path d="M5 17V12l2-5h10l2 5v5" /><path d="M3 17h18" /><circle cx="7.5" cy="17" r="2" /><circle cx="16.5" cy="17" r="2" /> }
+                @case ('inbox') { <path d="M3 12h5l2 3h4l2-3h5" /><path d="M5 5h14l2 7v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5z" /> }
+                @case ('tag') { <path d="M20.6 13.4l-7.2 7.2a2 2 0 01-2.8 0l-7-7A2 2 0 013 12.2V5a2 2 0 012-2h7.2a2 2 0 011.4.6l7 7a2 2 0 010 2.8z" /><circle cx="8.5" cy="8.5" r="1.4" /> }
+                @default { <path d="M17 20v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2" /><circle cx="9.5" cy="7" r="3.5" /><path d="M22 20v-2a4 4 0 00-3-3.9" /><path d="M16 3.5a4 4 0 010 7" /> }
+              }
+            </svg>
+          </span>
+          <span class="sb-label">{{ item.label }}</span>
+          @if (item.badge && item.badge()) {
+            <span class="sb-badge">{{ item.badge() }}</span>
+          }
         </a>
       }
     </nav>
 
-    <div class="sidebar-footer">
-      <div class="user-info">
-        <div class="user-avatar">{{ auth.currentUser()?.name?.[0] ?? 'U' }}</div>
-        <div class="user-details">
-          <p class="user-name">{{ auth.currentUser()?.name }}</p>
-          <p class="user-role">{{ auth.currentUser()?.role }}</p>
-        </div>
+    <div class="sb-bottom">
+      <a routerLink="/" class="sb-item sb-storefront" (click)="closeMobile()" title="View storefront">
+        <span class="sb-ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M15 3h6v6M10 14L21 3M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" />
+          </svg>
+        </span>
+        <span class="sb-label">View storefront</span>
+      </a>
+
+      <div class="sb-user">
+        <span class="sb-avatar" aria-hidden="true">{{ auth.initials() }}</span>
+        <span class="sb-user-info">
+          <span class="sb-user-name">{{ auth.currentUser()?.name }}</span>
+          <span class="sb-user-role">{{ auth.currentUser()?.role }}</span>
+        </span>
+        <button class="sb-logout" (click)="logout()" title="Sign out" aria-label="Sign out">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" />
+          </svg>
+        </button>
       </div>
-      <button class="logout-btn" (click)="auth.logout()">⏻</button>
     </div>
   </aside>
 
-  <!-- Main content -->
-  <main class="main-content">
-    <router-outlet />
-  </main>
+  <!-- ═══════════════ MAIN ═══════════════ -->
+  <div class="main">
+    <header class="topbar">
+      <button class="tb-burger" (click)="mobileOpen.set(true)" aria-label="Open menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+
+      <span class="tb-brand">{{ brand.name }} <span class="tb-dim">Admin</span></span>
+
+      <!-- Each page carries its own primary action, so the bar stays contextual. -->
+      <div class="tb-actions">
+        <a [href]="'tel:' + brand.contact.phoneRaw" class="tb-phone" title="Dealership line">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3.1 19.5 19.5 0 01-6-6A19.8 19.8 0 012.1 4.2 2 2 0 014.1 2h3a2 2 0 012 1.7c.1 1 .4 1.9.7 2.8a2 2 0 01-.5 2.1L8.1 9.9a16 16 0 006 6l1.3-1.2a2 2 0 012.1-.5c.9.3 1.8.6 2.8.7a2 2 0 011.7 2z" />
+          </svg>
+          <span>{{ brand.contact.phone }}</span>
+        </a>
+      </div>
+    </header>
+
+    <main class="content">
+      <router-outlet />
+    </main>
+  </div>
+
+  @if (mobileOpen()) {
+    <div class="sb-backdrop" (click)="closeMobile()"></div>
+  }
 </div>
