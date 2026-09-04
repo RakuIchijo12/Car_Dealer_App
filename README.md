@@ -79,21 +79,28 @@ Replace these with your own photography of your actual stock before trading.
 ### Studio photography via CarImages (optional)
 
 For genuinely uniform imagery — every vehicle at the same angle on the same background —
-wire up [CarImages](https://carimagesapi.com). It needs **two** credentials; the key alone
-will not authenticate:
+wire up [CarImages](https://carimagesapi.com):
 
 ```bash
 # backend/.env
-CARIMAGES_API_KEY=ci_...        # identifies the account, safe client-side
-CARIMAGES_API_SECRET=...        # authorises the request, server-side only
-CARIMAGES_ANGLE=front34         # the classic three-quarter
+CARIMAGES_API_KEY=ci_...        # the /signed-url flow authenticates on this alone
+CARIMAGES_API_SECRET=           # optional; sent as X-Api-Secret on plans that need it
+CARIMAGES_ANGLE=front34
 ```
 
 ```bash
-npm run photos:carimages            # only vehicles missing a photo
-npm run photos:carimages -- --all   # re-shoot the whole inventory
-npm run photos:optimize             # then compress
+npm run photos:carimages -- --preview=4   # fetch 4 into uploads/_carimages-preview,
+                                          # database untouched — look before you leap
+npm run photos:carimages                  # only vehicles missing a photo
+npm run photos:carimages -- --all         # re-shoot the whole inventory
+npm run photos:optimize                   # then compress
 ```
+
+**Tier caveat.** The free tier returns one **watermarked** 750x500 render per vehicle and
+ignores `angle` — every request comes back byte-identical regardless of what you ask for.
+The renders are model-accurate and perfectly consistent, but the watermark makes them
+unusable on a live site. A paid plan is required for clean images and real angle selection.
+Preview first and decide before running `--all`.
 
 ### 4. Run
 

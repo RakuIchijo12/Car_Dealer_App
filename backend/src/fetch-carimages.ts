@@ -12,20 +12,18 @@ import { Car } from './cars/car.entity';
  * (carimagesapi.com), so every vehicle is shot at the same angle on the same
  * background — the thing stock photography can never give you.
  *
- * Auth needs BOTH credentials: the key identifies the account and is safe
- * client-side, the secret authorises the request and must stay server-side.
- * Set them in backend/.env:
+ * Auth: /signed-url authenticates on CARIMAGES_API_KEY alone — it mints a
+ * short-lived CDN link. CARIMAGES_API_SECRET is sent as X-Api-Secret when set,
+ * for plans that require it, but is not needed for this flow.
  *
- *   CARIMAGES_API_KEY=ci_...
- *   CARIMAGES_API_SECRET=...
+ * Run:  npm run photos:carimages                  fill only vehicles lacking a photo
+ *       npm run photos:carimages -- --all         re-shoot the entire inventory
+ *       npm run photos:carimages -- --preview=4   fetch 4 into uploads/_carimages-preview
+ *                                                 without touching the database
  *
- * Run:  npm run photos:carimages            (fills only vehicles lacking a photo)
- *       npm run photos:carimages -- --all   (re-shoots the entire inventory)
- *
- * NOTE: the exact response envelope is confirmed on the first successful run —
- * `extractImageUrl` below handles the shapes the API is documented to return and
- * logs the raw payload if it sees something else, so a mismatch is a one-line fix
- * rather than a silent failure.
+ * Note on tiers: the free tier returns one watermarked 750x500 render per
+ * vehicle and ignores `angle` — every request comes back byte-identical. A paid
+ * plan is required for unwatermarked images and real angle selection.
  */
 
 const UPLOADS_DIR = path.join(__dirname, '..', 'uploads');
@@ -35,6 +33,7 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 interface Config {
   key: string;
+  /** Optional: /signed-url authenticates on the key alone. */
   secret: string;
   baseUrl: string;
   angle: string;
@@ -48,19 +47,9 @@ function readConfig(): Config | null {
     console.error('\n✗ CARIMAGES_API_KEY is not set in backend/.env\n');
     return null;
   }
-  if (!secret) {
-    console.error(
-      '\n✗ CARIMAGES_API_SECRET is not set in backend/.env.\n' +
-        '  CarImages authenticates with a key AND a secret — the key alone is\n' +
-        '  rejected. Copy the secret from your CarImages dashboard, add it as\n' +
-        '  CARIMAGES_API_SECRET, then run this again.\n',
-    );
-    return null;
-  }
-
   return {
     key,
-    secret,
+    secret: secret ?? '',
     baseUrl: (process.env.CARIMAGES_BASE_URL ?? 'https://carimagesapi.com/api/v1').replace(/\/$/, ''),
     angle: process.env.CARIMAGES_ANGLE ?? 'front34',
   };
@@ -89,7 +78,7 @@ function extractImageUrl(payload: unknown): string | null {
 
 async function fetchImageUrl(cfg: Config, car: Car): Promise<string | null> {
   const make = car.make?.name ?? '';
-  const params = {
+  const params: Record<string, string | number> = {
     api_key: cfg.key,
     make,
     model: car.model,
@@ -98,19 +87,19 @@ async function fetchImageUrl(cfg: Config, car: Car): Promise<string | null> {
   };
 
   try {
-    const res = await axios.get(`${cfg.baseUrl}/images`, {
+    // /signed-url mints a short-lived CDN link; /images does not exist.
+    const res = await axios.get(`${cfg.baseUrl}/signed-url`, {
       params,
-      headers: { 'X-Api-Secret': cfg.secret, Accept: 'application/json' },
+      // The secret is only needed on plans that require it — send it when set.
+      headers: {
+        Accept: 'application/json',
+        ...(cfg.secret ? { 'X-Api-Secret': cfg.secret } : {}),
+      },
       timeout: 25000,
-      // Images may be returned as a redirect to the CDN rather than JSON.
-      maxRedirects: 0,
       validateStatus: (s) => (s >= 200 && s < 400) || s === 404,
     });
 
     if (res.status === 404) return null;
-    if (res.status >= 300 && res.status < 400) {
-      return (res.headers['location'] as string) ?? null;
-    }
 
     const url = extractImageUrl(res.data);
     if (!url) {
@@ -151,19 +140,31 @@ async function run() {
   if (!cfg) process.exit(1);
 
   const all = process.argv.includes('--all');
+  const previewArg = process.argv.find((a) => a.startsWith('--preview'));
+  const previewCount = previewArg ? Number(previewArg.split('=')[1] ?? 3) : 0;
   if (!fs.existsSync(UPLOADS_DIR)) fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 
   const app = await NestFactory.createApplicationContext(AppModule, { logger: ['error'] });
   const carRepo: Repository<Car> = app.get(getRepositoryToken(Car));
 
   const cars = await carRepo.find({ relations: { make: true } });
-  const targets = all
+  let targets = all
     ? cars
     : cars.filter((c) => {
         if (!c.photo) return true;
         const p = path.join(UPLOADS_DIR, c.photo);
         return !fs.existsSync(p) || fs.statSync(p).size < MIN_BYTES;
       });
+
+  // Preview writes to uploads/_carimages-preview and leaves the database alone,
+  // so the result can be compared before committing to it.
+  const previewDir = path.join(UPLOADS_DIR, '_carimages-preview');
+  if (previewCount) {
+    targets = cars.slice(0, previewCount);
+    fs.mkdirSync(previewDir, { recursive: true });
+    console.log(`\n👀 Preview mode — writing ${previewCount} image(s) to uploads/_carimages-preview`);
+    console.log('   The database is NOT modified.\n');
+  }
 
   console.log(
     `\n🚘 CarImages — ${targets.length} vehicle(s), angle "${cfg.angle}"` +
@@ -184,9 +185,13 @@ async function run() {
 
     const filename =
       `ci-${make.toLowerCase()}-${car.model.toLowerCase().replace(/[\s/]+/g, '-')}-${car.year}.jpg`;
-    if (await download(url, path.join(UPLOADS_DIR, filename))) {
-      car.photo = filename;
-      await carRepo.save(car);
+    const dest = previewCount ? path.join(previewDir, filename) : path.join(UPLOADS_DIR, filename);
+
+    if (await download(url, dest)) {
+      if (!previewCount) {
+        car.photo = filename;
+        await carRepo.save(car);
+      }
       filled++;
       console.log('    📷 saved');
     } else {
