@@ -24,7 +24,9 @@
     "photos:fetch": "ts-node -r tsconfig-paths/register src/fill-photos.ts",
     "photos:direction": "ts-node -r tsconfig-paths/register src/normalize-photo-direction.ts",
     "photos:carimages": "ts-node -r tsconfig-paths/register src/fetch-carimages.ts",
-    "spin:render": "ts-node -r tsconfig-paths/register src/render-spin.ts"
+    "spin:render": "ts-node -r tsconfig-paths/register src/render-spin.ts",
+    "photos:wiki": "ts-node -r tsconfig-paths/register src/fetch-wikimedia.ts",
+    "photos:normalise": "ts-node -r tsconfig-paths/register src/normalise-photos.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",

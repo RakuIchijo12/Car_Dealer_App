@@ -76,46 +76,48 @@ Mirroring also mirrors number plates and badge text — the accepted trade-off f
 catalogue, and the same technique CarImages uses for its "mirrored right-facing" variants.
 Replace these with your own photography of your actual stock before trading.
 
-### Vehicle photography — CarImages studio renders
+### Vehicle photography
 
-The demo inventory uses studio renders from [CarImages](https://carimagesapi.com): the
-correct model for every listing, shot at one angle under one lighting setup.
-
-```bash
-# backend/.env
-CARIMAGES_API_KEY=ci_...        # the /signed-url flow authenticates on this alone
-CARIMAGES_API_SECRET=           # optional; sent as X-Api-Secret on plans that need it
-CARIMAGES_ANGLE=front34
-```
+The demo inventory is photographed from Wikimedia Commons, then normalised to one house
+standard.
 
 ```bash
-npm run photos:carimages -- --preview=4   # 4 into uploads/_carimages-preview,
-                                          # database untouched — look before you leap
-npm run photos:carimages                  # only vehicles missing a photo
-npm run photos:carimages -- --all         # re-shoot the whole inventory
+npm run photos:wiki                    # only vehicles missing a photo
+npm run photos:wiki -- --all           # re-source everything
+npm run photos:wiki -- --id=172        # one vehicle
+npm run photos:wiki -- --id=172 --offset=1   # take the next-best candidate when the
+                                             # top pick is a poor photograph
+npm run photos:normalise               # crop, align direction, compress
+npm run photos:normalise -- --undo-flip
 ```
 
-The API returns each car **cut out on transparency**, so the script composites a soft
-contact shadow and keeps the alpha rather than flattening onto a colour. One asset then
-reads correctly on both the light and dark themes, sitting on whatever the page background
-is. Output is 1600x1000 WebP, roughly 320 KB each.
+**Sourcing.** Searches the Commons *File* namespace rather than the article-summary
+endpoint, which only ever returns one lead image per article and often the wrong
+generation. Candidates are scored on resolution, aspect ratio and filename signals, then
+filtered:
 
-It also reads the render's dominant paint colour back and writes it to the listing, because
-the API ignores any colour parameter — without that a listing could claim "Silver" beside a
-red car.
+- `intitle:"Make Model"` first — an exact filename match is the strongest guard against
+  rebadged siblings. Without it the Toyota Wigo resolved to a Daihatsu Ayla and the Rush
+  to a Daihatsu Taruna.
+- Filename words are matched on **word boundaries**, not substrings. As a substring `toy`
+  rejects every single *Toy*ota.
+- The model year is read from the **first** year in the name, after stripping any capture
+  date. `2003 Mitsubishi Montero Sport ... 09-11-2023.jpg` is a 2003 car photographed in
+  2023; reading the trailing date made twenty-year-old cars look current.
+- Interiors, engine bays, rear shots, wrecks, race cars and die-cast models are excluded.
 
-**Tier caveats, all verified against the live API rather than the docs:**
+**Normalising.** Originals arrive anywhere from 1.3:1 to 2.6:1 and up to 3840px. They are
+cropped to 2000x1250 (16:10) using an attention-weighted crop so the car stays framed,
+mirrored where needed so the whole catalogue faces right, and encoded as progressive
+mozjpeg at q84. The demo set lands at ~350 KB each.
 
-| Parameter | Behaviour on the free tier |
-| --------- | -------------------------- |
-| `width`   | **Honoured** — 1600 returns 1536x1024 instead of the 750x500 default |
-| `angle`   | Ignored — all ten values tested return byte-identical images |
-| `color`   | Ignored — every value returns byte-identical images |
-| `format`  | Ignored — always WebP |
-| watermark | Always applied; a paid plan is required to remove it |
+Mirroring is driven by an explicit list, not detection — telling which way a car points is
+a vision problem and a wrong guess silently mirrors a number plate. It is recorded in a
+manifest so `--undo-flip` restores the originals, and re-running will not double-flip.
 
-Replace these with your own photography of your actual stock before trading — buyers of
-used cars want to see the specific unit, not a manufacturer render.
+Crowd-sourced photography varies: a few listings show a car in a dim showroom or partly
+behind signage. `--offset=N` swaps in the next-best candidate for those. Replace the lot
+with your own photography of your actual stock before trading.
 
 ### 360° turntable views
 

@@ -18,7 +18,9 @@
     "test": "npm --prefix backend test",
     "photos:optimize": "npm --prefix backend run photos:optimize",
     "photos:direction": "npm --prefix backend run photos:direction",
-    "photos:carimages": "npm --prefix backend run photos:carimages"
+    "photos:carimages": "npm --prefix backend run photos:carimages",
+    "photos:wiki": "npm --prefix backend run photos:wiki",
+    "photos:normalise": "npm --prefix backend run photos:normalise"
   },
   "devDependencies": {
     "concurrently": "^9.1.2"
