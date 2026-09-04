@@ -76,10 +76,10 @@ Mirroring also mirrors number plates and badge text — the accepted trade-off f
 catalogue, and the same technique CarImages uses for its "mirrored right-facing" variants.
 Replace these with your own photography of your actual stock before trading.
 
-### Studio photography via CarImages (optional)
+### Vehicle photography — CarImages studio renders
 
-For genuinely uniform imagery — every vehicle at the same angle on the same background —
-wire up [CarImages](https://carimagesapi.com):
+The demo inventory uses studio renders from [CarImages](https://carimagesapi.com): the
+correct model for every listing, shot at one angle under one lighting setup.
 
 ```bash
 # backend/.env
@@ -89,18 +89,33 @@ CARIMAGES_ANGLE=front34
 ```
 
 ```bash
-npm run photos:carimages -- --preview=4   # fetch 4 into uploads/_carimages-preview,
+npm run photos:carimages -- --preview=4   # 4 into uploads/_carimages-preview,
                                           # database untouched — look before you leap
 npm run photos:carimages                  # only vehicles missing a photo
 npm run photos:carimages -- --all         # re-shoot the whole inventory
-npm run photos:optimize                   # then compress
 ```
 
-**Tier caveat.** The free tier returns one **watermarked** 750x500 render per vehicle and
-ignores `angle` — every request comes back byte-identical regardless of what you ask for.
-The renders are model-accurate and perfectly consistent, but the watermark makes them
-unusable on a live site. A paid plan is required for clean images and real angle selection.
-Preview first and decide before running `--all`.
+The API returns each car **cut out on transparency**, so the script composites a soft
+contact shadow and keeps the alpha rather than flattening onto a colour. One asset then
+reads correctly on both the light and dark themes, sitting on whatever the page background
+is. Output is 1600x1000 WebP, roughly 320 KB each.
+
+It also reads the render's dominant paint colour back and writes it to the listing, because
+the API ignores any colour parameter — without that a listing could claim "Silver" beside a
+red car.
+
+**Tier caveats, all verified against the live API rather than the docs:**
+
+| Parameter | Behaviour on the free tier |
+| --------- | -------------------------- |
+| `width`   | **Honoured** — 1600 returns 1536x1024 instead of the 750x500 default |
+| `angle`   | Ignored — all ten values tested return byte-identical images |
+| `color`   | Ignored — every value returns byte-identical images |
+| `format`  | Ignored — always WebP |
+| watermark | Always applied; a paid plan is required to remove it |
+
+Replace these with your own photography of your actual stock before trading — buyers of
+used cars want to see the specific unit, not a manufacturer render.
 
 ### 360° turntable views
 

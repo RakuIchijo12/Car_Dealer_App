@@ -5,7 +5,7 @@ import {
 import { FileFieldsInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
-import { existsSync, mkdirSync } from 'fs';
+import { existsSync, mkdirSync, unlinkSync } from 'fs';
 import { CarsService, CarFilters } from './cars.service';
 import { CreateCarDto } from './dto/create-car.dto';
 import { UpdateCarDto } from './dto/update-car.dto';
@@ -150,6 +150,15 @@ export class CarsController {
     @UploadedFiles() frames?: Express.Multer.File[],
   ) {
     if (!frames?.length || frames.length < 8) {
+      // Multer has already written these to disk, so a rejected request must
+      // sweep them up or they accumulate as orphans.
+      for (const f of frames ?? []) {
+        try {
+          unlinkSync(f.path);
+        } catch {
+          /* already gone */
+        }
+      }
       throw new BadRequestException('A turntable needs at least 8 frames (24–36 is ideal)');
     }
     return this.carsService.setSpin(id, frames);
