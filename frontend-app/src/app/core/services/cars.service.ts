@@ -54,6 +54,17 @@ export class CarsService {
     return this.http.patch<Car>(`${this.url}/${id}/featured`, {});
   }
 
+  /** Upload an ordered 360 turntable, replacing any existing one. */
+  setSpin(id: number, frames: File[]) {
+    const fd = new FormData();
+    frames.forEach((f) => fd.append('frames', f));
+    return this.http.post<Car>(`${this.url}/${id}/spin`, fd);
+  }
+
+  clearSpin(id: number) {
+    return this.http.delete<Car>(`${this.url}/${id}/spin`);
+  }
+
   removeImage(id: number, filename: string) {
     return this.http.delete<Car>(`${this.url}/${id}/images/${encodeURIComponent(filename)}`);
   }

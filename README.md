@@ -102,6 +102,32 @@ The renders are model-accurate and perfectly consistent, but the watermark makes
 unusable on a live site. A paid plan is required for clean images and real angle selection.
 Preview first and decide before running `--all`.
 
+### 360° turntable views
+
+Vehicle pages show an interactive 360° viewer when a turntable exists: drag to rotate,
+scroll or pinch to zoom, drag to pan when zoomed, plus a scrubber, keyboard arrows and
+fullscreen. It plays a pre-rendered frame sequence — no WebGL and no 3D model download —
+so it works on low-end phones. Listings without one fall back to the photo gallery.
+
+**The practical way to make one:** walk around the vehicle taking 24–36 evenly spaced
+photos with sequential filenames, then in the admin open the vehicle → **360° view** →
+select them all. Frames are ordered by filename. This is how dealers actually do it, and
+it shows the buyer the *actual* car.
+
+There is also an offline renderer that produces frames from a 3D model:
+
+```bash
+npm run spin:render                  # every vehicle
+npm run spin:render -- --id=172      # one
+npm run spin:render -- --frames=24   # coarser (default 36)
+```
+
+It drives three.js in headless Chrome and writes `uploads/spin/<carId>/000.webp…`.
+**It is a scaffold, not a finished feature:** the only freely redistributable car model
+bundled is a sports car, so it renders the same body shell for every vehicle regardless of
+what the listing actually is. Useful for demonstrating the viewer; do not point it at a
+live inventory without swapping in body-type-accurate models under `backend/assets/`.
+
 ### 4. Run
 
 ```bash

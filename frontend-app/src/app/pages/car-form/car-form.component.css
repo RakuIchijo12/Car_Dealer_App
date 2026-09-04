@@ -157,3 +157,37 @@
   .row-2, .row-3 { grid-template-columns: 1fr; }
   .sect { padding: 1.15rem; }
 }
+
+/* ═══════════════ 360 UPLOAD ═══════════════ */
+.spin-live {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.7rem 0.85rem;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--amber-line);
+  background: var(--amber-soft);
+}
+.spin-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--amber);
+  flex-shrink: 0;
+}
+.spin-live-text { flex: 1; font-size: 0.8rem; color: var(--text-2); }
+.spin-live-text strong { color: var(--text); }
+.spin-remove {
+  background: none;
+  border: none;
+  color: var(--red);
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+}
+.spin-remove:hover:not(:disabled) { text-decoration: underline; }
+.spin-remove:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.spin-picked { margin: 0; font-size: 0.8rem; color: var(--text-2); }
+.spin-warn { color: var(--red); font-weight: 600; }

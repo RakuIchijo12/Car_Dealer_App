@@ -2,7 +2,7 @@ import {
   Controller, Get, Post, Patch, Delete, Body, Param, Query,
   UseGuards, UseInterceptors, UploadedFiles, ParseIntPipe, BadRequestException,
 } from '@nestjs/common';
-import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import { FileFieldsInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { existsSync, mkdirSync } from 'fs';
@@ -26,7 +26,7 @@ const uploadOptions = {
       cb(null, `car-${unique}${extname(file.originalname).toLowerCase()}`);
     },
   }),
-  limits: { fileSize: MAX_FILE_SIZE, files: 9 },
+  limits: { fileSize: MAX_FILE_SIZE, files: 72 },
   fileFilter: (
     _req: unknown,
     file: Express.Multer.File,
@@ -137,6 +137,27 @@ export class CarsController {
   @Patch(':id/featured')
   toggleFeatured(@Param('id', ParseIntPipe) id: number) {
     return this.carsService.toggleFeatured(id);
+  }
+
+  /**
+   * Upload a 360 turntable. Send the frames in shot order as `frames`;
+   * anything already stored for this vehicle is replaced.
+   */
+  @Post(':id/spin')
+  @UseInterceptors(FilesInterceptor('frames', 72, uploadOptions))
+  setSpin(
+    @Param('id', ParseIntPipe) id: number,
+    @UploadedFiles() frames?: Express.Multer.File[],
+  ) {
+    if (!frames?.length || frames.length < 8) {
+      throw new BadRequestException('A turntable needs at least 8 frames (24–36 is ideal)');
+    }
+    return this.carsService.setSpin(id, frames);
+  }
+
+  @Delete(':id/spin')
+  clearSpin(@Param('id', ParseIntPipe) id: number) {
+    return this.carsService.clearSpin(id);
   }
 
   @Delete(':id/images/:filename')

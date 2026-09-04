@@ -258,6 +258,56 @@
           <input id="f-gallery" type="file" accept="image/*" multiple class="sr-only" (change)="onGalleryChange($event)" />
         </section>
 
+        @if (isEdit()) {
+          <section class="card sect">
+            <h2 class="sect-title">360° view</h2>
+            <p class="sect-hint">
+              Walk around the vehicle taking 24–36 evenly spaced photos, then select them all.
+              They're ordered by filename, so shoot with sequential names.
+            </p>
+
+            @if (existingSpin() > 0) {
+              <div class="spin-live">
+                <span class="spin-dot" aria-hidden="true"></span>
+                <span class="spin-live-text">
+                  <strong>{{ existingSpin() }} frames</strong> live on the listing
+                </span>
+                <button
+                  type="button"
+                  class="spin-remove"
+                  (click)="removeSpin()"
+                  [disabled]="spinBusy()"
+                >Remove</button>
+              </div>
+            }
+
+            @if (spinFiles().length) {
+              <p class="spin-picked">
+                {{ spinFiles().length }} frame{{ spinFiles().length === 1 ? '' : 's' }} selected
+                @if (spinFiles().length < 8) { <span class="spin-warn">— need at least 8</span> }
+              </p>
+              <button
+                type="button"
+                class="btn btn-primary btn-sm btn-block"
+                (click)="uploadSpin()"
+                [disabled]="spinBusy() || spinFiles().length < 8"
+              >
+                @if (spinBusy()) { <span class="spinner"></span> Uploading… }
+                @else { Upload {{ spinFiles().length }} frames }
+              </button>
+            }
+
+            <label for="f-spin" class="btn btn-ghost btn-sm btn-block">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
+                <ellipse cx="12" cy="12" rx="10" ry="5" />
+                <path d="M4.5 14.5A9.6 9.6 0 0 0 12 17c4.2 0 7.5-1.6 7.5-3.5" stroke-linecap="round" />
+              </svg>
+              {{ existingSpin() ? 'Replace 360° frames' : 'Select 360° frames' }}
+            </label>
+            <input id="f-spin" type="file" accept="image/*" multiple class="sr-only" (change)="onSpinChange($event)" />
+          </section>
+        }
+
         <section class="card sect">
           <h2 class="sect-title">Visibility</h2>
           <label class="check">

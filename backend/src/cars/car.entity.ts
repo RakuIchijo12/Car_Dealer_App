@@ -117,6 +117,10 @@ export class Car {
   @Column({ type: 'int', default: 0 })
   views: number;
 
+  /** Number of 360° turntable frames on disk under uploads/spin/<id>/. 0 = none. */
+  @Column({ type: 'int', default: 0 })
+  spinFrames: number;
+
   @CreateDateColumn()
   createdAt: Date;
 

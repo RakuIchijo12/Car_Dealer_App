@@ -1,0 +1,125 @@
+<div class="c360" [class.fs]="fullscreen()">
+  <div
+    #stage
+    class="stage"
+    [class.grabbing]="dragging()"
+    [class.zoomed]="zoomed()"
+    tabindex="0"
+    role="img"
+    [attr.aria-label]="alt + ' — 360 degree view. Use left and right arrow keys to rotate.'"
+    (pointerdown)="onPointerDown($event)"
+    (pointermove)="onPointerMove($event)"
+    (pointerup)="onPointerUp($event)"
+    (pointercancel)="onPointerUp($event)"
+    (pointerleave)="onPointerUp($event)"
+    (wheel)="onWheel($event)"
+    (keydown)="onKeydown($event)"
+  >
+    <!-- Frames are stacked and toggled so the browser never re-decodes on spin -->
+    <div class="reel" [style.transform]="transform()">
+      @for (src of frames; track src; let i = $index) {
+        <img
+          [src]="src"
+          [alt]="i === 0 ? alt : ''"
+          class="frame"
+          [class.on]="i === index()"
+          draggable="false"
+          [attr.aria-hidden]="i === index() ? null : 'true'"
+          [attr.fetchpriority]="i === 0 ? 'high' : 'low'"
+        />
+      }
+    </div>
+
+    @if (!ready()) {
+      <div class="loading">
+        <div class="load-ring" [style.--p.%]="progress()"></div>
+        <span class="load-text">Preparing 360° view… {{ progress() }}%</span>
+      </div>
+    }
+
+    <!-- Drag affordance, retired once the user has seen the auto-spin -->
+    @if (ready() && !hinted() && !dragging()) {
+      <div class="hint">
+        <svg viewBox="0 0 48 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+          <path d="M14 12H34" stroke-linecap="round" />
+          <path d="M18 7l-5 5 5 5M30 7l5 5-5 5" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        <span>Drag to rotate</span>
+      </div>
+    }
+
+    <span class="badge-360" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9">
+        <ellipse cx="12" cy="12" rx="10" ry="5" />
+        <path d="M4.5 14.5A9.6 9.6 0 0 0 12 17c4.2 0 7.5-1.6 7.5-3.5" stroke-linecap="round" />
+      </svg>
+      360°
+    </span>
+  </div>
+
+  <!-- ── Controls ── -->
+  <div class="bar">
+    <div class="bar-left">
+      <button class="ctl" (click)="replay()" title="Replay the spin" aria-label="Replay the spin">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 12a9 9 0 1 0 3-6.7" />
+          <path d="M3 4v5h5" />
+        </svg>
+      </button>
+
+      <div class="scrub">
+        <input
+          type="range"
+          [min]="0"
+          [max]="frames.length - 1"
+          [value]="index()"
+          (input)="index.set(+$any($event.target).value)"
+          aria-label="Rotate the vehicle"
+        />
+      </div>
+    </div>
+
+    <div class="bar-right">
+      <button class="ctl" (click)="zoomOut()" [disabled]="zoom() <= 1" title="Zoom out" aria-label="Zoom out">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <circle cx="11" cy="11" r="7" /><path d="M20 20l-3.6-3.6M8 11h6" />
+        </svg>
+      </button>
+      <span class="zoom-val">{{ (zoom() * 100) | number: '1.0-0' }}%</span>
+      <button class="ctl" (click)="zoomIn()" [disabled]="zoom() >= 4" title="Zoom in" aria-label="Zoom in">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <circle cx="11" cy="11" r="7" /><path d="M20 20l-3.6-3.6M11 8v6M8 11h6" />
+        </svg>
+      </button>
+
+      @if (zoomed()) {
+        <button class="ctl" (click)="reset()" title="Reset zoom" aria-label="Reset zoom">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round">
+            <path d="M3 3h6M3 3v6M21 21h-6M21 21v-6M3 21h6M3 21v-6M21 3h-6M21 3v6" />
+          </svg>
+        </button>
+      }
+
+      <button class="ctl" (click)="toggleFullscreen()" [title]="fullscreen() ? 'Exit fullscreen' : 'Fullscreen'" [attr.aria-label]="fullscreen() ? 'Exit fullscreen' : 'Fullscreen'">
+        @if (fullscreen()) {
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 3v6H3M15 3v6h6M9 21v-6H3M15 21v-6h6" />
+          </svg>
+        } @else {
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 9V3h6M21 9V3h-6M3 15v6h6M21 15v6h-6" />
+          </svg>
+        }
+      </button>
+    </div>
+  </div>
+
+  @if (previewNotice) {
+    <p class="notice">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
+        <circle cx="10" cy="10" r="8" /><path d="M10 6.5v.01M10 9v4.5" stroke-linecap="round" />
+      </svg>
+      {{ previewNotice }}
+    </p>
+  }
+</div>

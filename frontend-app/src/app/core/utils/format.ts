@@ -91,6 +91,19 @@ export function carGallery(car: Car | null | undefined): string[] {
   return unique.length ? unique.map(photoUrl) : ['/car-placeholder.svg'];
 }
 
+/**
+ * Ordered URLs for a vehicle's 360 turntable, or an empty array when it has none.
+ * Frames are written as uploads/spin/<carId>/000.webp by the render script.
+ */
+export function spinFrames(car: Car | null | undefined): string[] {
+  const count = car?.spinFrames ?? 0;
+  if (!car || count < 2) return [];
+  return Array.from(
+    { length: count },
+    (_, i) => `${environment.uploadsUrl}/spin/${car.id}/${String(i).padStart(3, '0')}.webp`,
+  );
+}
+
 export function onImgError(event: Event): void {
   const img = event.target as HTMLImageElement;
   if (!img.src.endsWith('/car-placeholder.svg')) img.src = '/car-placeholder.svg';

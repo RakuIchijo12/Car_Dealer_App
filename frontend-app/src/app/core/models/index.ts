@@ -44,6 +44,7 @@ export interface Car {
   features?: string[];
   featured?: boolean;
   views?: number;
+  spinFrames?: number;
   createdAt?: string;
   updatedAt?: string;
 }

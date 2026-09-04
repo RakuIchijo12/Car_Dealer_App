@@ -1,0 +1,145 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    html, body { margin: 0; padding: 0; background: transparent; overflow: hidden; }
+    canvas { display: block; }
+  </style>
+</head>
+<body>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+/**
+ * Offline turntable renderer.
+ *
+ * Node drives this page in headless Chrome: it calls window.setup() once, then
+ * window.renderFrame(i) for each angle and screenshots the canvas. Keeping the
+ * scene alive between frames means the model and environment are built once.
+ */
+
+const SIZE = 1100;
+
+let renderer, scene, camera, carGroup, ready = false;
+
+window.setup = async (opts) => {
+  const { modelUrl, bodyColor, size = SIZE } = opts;
+
+  renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+  renderer.setPixelRatio(1);
+  renderer.setSize(size, size);
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.05;
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  document.body.appendChild(renderer.domElement);
+
+  scene = new THREE.Scene();
+  scene.background = null;
+
+  // Soft studio lighting from a generated room environment — gives the paint
+  // believable reflections without shipping an HDR file.
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+
+  const key = new THREE.DirectionalLight(0xffffff, 2.2);
+  key.position.set(5, 8, 6);
+  key.castShadow = true;
+  key.shadow.mapSize.set(2048, 2048);
+  key.shadow.camera.near = 0.5;
+  key.shadow.camera.far = 40;
+  key.shadow.camera.left = -6;
+  key.shadow.camera.right = 6;
+  key.shadow.camera.top = 6;
+  key.shadow.camera.bottom = -6;
+  key.shadow.bias = -0.0006;
+  scene.add(key);
+
+  scene.add(new THREE.DirectionalLight(0xdfe8ff, 0.6).translateX(-6).translateY(4).translateZ(-5));
+  scene.add(new THREE.AmbientLight(0xffffff, 0.35));
+
+  camera = new THREE.PerspectiveCamera(32, 1, 0.1, 100);
+
+  // Contact shadow catcher.
+  const shadowMat = new THREE.ShadowMaterial({ opacity: 0.28 });
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(40, 40), shadowMat);
+  ground.rotation.x = -Math.PI / 2;
+  ground.receiveShadow = true;
+  scene.add(ground);
+
+  // The source model ships Draco-compressed geometry.
+  const draco = new DRACOLoader();
+  draco.setDecoderPath('https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/libs/draco/gltf/');
+  const loader = new GLTFLoader();
+  loader.setDRACOLoader(draco);
+
+  const gltf = await loader.loadAsync(modelUrl);
+  const model = gltf.scene;
+
+  // Recolour the body panels, leave glass / rubber / chrome alone.
+  const paint = new THREE.Color(bodyColor);
+  model.traverse((o) => {
+    if (!o.isMesh) return;
+    o.castShadow = true;
+    o.receiveShadow = true;
+    const mats = Array.isArray(o.material) ? o.material : [o.material];
+    for (const m of mats) {
+      if (!m) continue;
+      const name = (m.name || '').toLowerCase();
+      if (name.includes('body') || name.includes('paint') || name.includes('carpaint')) {
+        m.color = paint;
+        m.metalness = 0.55;
+        m.roughness = 0.22;
+        if ('clearcoat' in m) { m.clearcoat = 1; m.clearcoatRoughness = 0.06; }
+      }
+      m.envMapIntensity = 1.15;
+    }
+  });
+
+  // Normalise: centre on origin, sit on the ground, scale to a known length.
+  const box = new THREE.Box3().setFromObject(model);
+  const sizeVec = box.getSize(new THREE.Vector3());
+  const centre = box.getCenter(new THREE.Vector3());
+  const scale = 4.6 / Math.max(sizeVec.x, sizeVec.z);
+
+  model.position.sub(centre);
+  model.position.y += sizeVec.y / 2;
+  model.scale.setScalar(scale);
+
+  carGroup = new THREE.Group();
+  carGroup.add(model);
+  scene.add(carGroup);
+
+  const radius = 9.2;
+  camera.position.set(0, 2.35, radius);
+  camera.lookAt(0, 0.85, 0);
+
+  ready = true;
+  return true;
+};
+
+/** Rotates the turntable to frame `i` of `total` and draws one image. */
+window.renderFrame = (i, total) => {
+  if (!ready) return false;
+  carGroup.rotation.y = (i / total) * Math.PI * 2;
+  renderer.render(scene, camera);
+  return true;
+};
+
+window.isReady = () => ready;
+</script>
+</body>
+</html>

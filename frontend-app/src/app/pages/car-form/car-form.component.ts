@@ -48,6 +48,11 @@ export class CarFormComponent implements OnInit {
   existingImages = signal<string[]>([]);
   pendingImages = signal<PendingImage[]>([]);
 
+  /** 360 turntable. Frames upload separately from the main form. */
+  existingSpin = signal(0);
+  spinFiles = signal<File[]>([]);
+  spinBusy = signal(false);
+
   readonly statuses = ['available', 'reserved', 'sold'];
   readonly bodyTypes = ['sedan', 'suv', 'mpv', 'pickup', 'hatchback', 'van', 'crossover'];
   readonly transmissions = ['automatic', 'manual', 'cvt'];
@@ -125,6 +130,7 @@ export class CarFormComponent implements OnInit {
 
     if (car.photo) this.coverPreview.set(photoUrl(car.photo));
     this.existingImages.set(car.images ?? []);
+    this.existingSpin.set(car.spinFrames ?? 0);
   }
 
   onCoverChange(event: Event) {
@@ -189,6 +195,58 @@ export class CarFormComponent implements OnInit {
         this.toast.success('Photo removed');
       },
       error: () => this.toast.error('Could not remove the photo'),
+    });
+  }
+
+  // ── 360 turntable ─────────────────────────────────────────────────────────
+  onSpinChange(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const picked = Array.from(input.files ?? []).filter((f) => this.validate(f));
+    // Sort by filename so 001,002,…,010 land in shot order regardless of how
+    // the OS handed them over.
+    picked.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+    this.spinFiles.set(picked);
+    input.value = '';
+  }
+
+  uploadSpin() {
+    const id = this.carId();
+    const files = this.spinFiles();
+    if (!id || files.length < 8) {
+      this.toast.error('Not enough frames', 'A turntable needs at least 8 — 24 to 36 is ideal.');
+      return;
+    }
+
+    this.spinBusy.set(true);
+    this.carsSvc.setSpin(id, files).subscribe({
+      next: (car) => {
+        this.spinBusy.set(false);
+        this.spinFiles.set([]);
+        this.existingSpin.set(car.spinFrames ?? files.length);
+        this.toast.success('360 view uploaded', `${files.length} frames`);
+      },
+      error: (err) => {
+        this.spinBusy.set(false);
+        this.toast.error('Could not upload the 360 view', err?.error?.message ?? 'Please try again.');
+      },
+    });
+  }
+
+  removeSpin() {
+    const id = this.carId();
+    if (!id || !confirm('Remove the 360 view for this vehicle?')) return;
+
+    this.spinBusy.set(true);
+    this.carsSvc.clearSpin(id).subscribe({
+      next: () => {
+        this.spinBusy.set(false);
+        this.existingSpin.set(0);
+        this.toast.success('360 view removed');
+      },
+      error: () => {
+        this.spinBusy.set(false);
+        this.toast.error('Could not remove the 360 view');
+      },
     });
   }
 

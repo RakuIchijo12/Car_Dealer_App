@@ -1,0 +1,190 @@
+:host { display: block; }
+
+.c360 {
+  position: relative;
+  border-radius: var(--r-xl);
+  overflow: hidden;
+  border: 1px solid var(--hairline);
+  background:
+    radial-gradient(ellipse 70% 55% at 50% 82%, var(--amber-soft), transparent 70%),
+    var(--surface);
+}
+
+/* Fullscreen takes over the viewport rather than using the native API, so the
+   controls keep their styling and Escape behaves predictably. */
+.c360.fs {
+  position: fixed;
+  inset: 0;
+  z-index: 9500;
+  border-radius: 0;
+  border: none;
+  background: var(--ink);
+  display: flex;
+  flex-direction: column;
+  animation: fade 0.2s ease;
+}
+.c360.fs .stage { flex: 1; aspect-ratio: auto; }
+
+/* ── Stage ── */
+.stage {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  cursor: grab;
+  touch-action: none;   /* we handle pan/zoom ourselves */
+  outline: none;
+  user-select: none;
+}
+.stage.grabbing { cursor: grabbing; }
+.stage.zoomed { cursor: move; }
+.stage:focus-visible { outline: 2px solid var(--amber); outline-offset: -2px; }
+
+.reel {
+  position: absolute;
+  inset: 0;
+  transform-origin: center;
+  transition: transform 0.12s ease-out;
+  will-change: transform;
+}
+
+/* Every frame is mounted; only one is painted. Swapping opacity avoids the
+   decode flash you get from changing a single <img> src on each step. */
+.frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  opacity: 0;
+  pointer-events: none;
+}
+.frame.on { opacity: 1; }
+
+/* ── Loading ── */
+.loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.9rem;
+  background: var(--surface);
+  z-index: 3;
+}
+.load-ring {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: conic-gradient(var(--amber) calc(var(--p) * 1%), var(--surface-3) 0);
+  mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 0);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 0);
+  transition: background 0.2s linear;
+}
+.load-text { font-size: 0.8rem; color: var(--text-3); }
+
+/* ── Overlays ── */
+.hint {
+  position: absolute;
+  left: 50%;
+  bottom: 1.1rem;
+  transform: translateX(-50%);
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.42rem 0.9rem;
+  border-radius: 99px;
+  background: rgba(7, 8, 12, 0.66);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #fff;
+  font-size: 0.76rem;
+  font-weight: 600;
+  pointer-events: none;
+  animation: fade 0.5s ease both;
+}
+.hint svg { width: 34px; height: 17px; }
+
+.badge-360 {
+  position: absolute;
+  top: 0.85rem;
+  left: 0.85rem;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.28rem 0.7rem;
+  border-radius: 99px;
+  background: rgba(7, 8, 12, 0.66);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  pointer-events: none;
+}
+.badge-360 svg { width: 13px; height: 13px; }
+
+/* ── Control bar ── */
+.bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.6rem 0.75rem;
+  border-top: 1px solid var(--hairline);
+  background: var(--ink-2);
+}
+.bar-left { display: flex; align-items: center; gap: 0.6rem; flex: 1; min-width: 0; }
+.bar-right { display: flex; align-items: center; gap: 0.35rem; flex-shrink: 0; }
+
+.ctl {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  border: 1px solid var(--hairline);
+  background: var(--raise-1);
+  color: var(--text-2);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.ctl svg { width: 15px; height: 15px; }
+.ctl:hover:not(:disabled) { color: var(--amber); border-color: var(--amber-line); background: var(--amber-soft); }
+.ctl:disabled { opacity: 0.35; cursor: not-allowed; }
+
+.scrub { flex: 1; min-width: 0; display: flex; align-items: center; }
+.scrub input { width: 100%; }
+
+.zoom-val {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-3);
+  min-width: 40px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Notice ── */
+.notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0.6rem 0.9rem;
+  border-top: 1px solid var(--hairline);
+  background: var(--raise-1);
+  font-size: 0.73rem;
+  line-height: 1.5;
+  color: var(--text-3);
+}
+.notice svg { width: 14px; height: 14px; flex-shrink: 0; margin-top: 1px; }
+
+@media (max-width: 640px) {
+  .stage { aspect-ratio: 4 / 3; }
+  .zoom-val { display: none; }
+  .bar { padding: 0.5rem; }
+}

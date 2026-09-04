@@ -8,11 +8,12 @@ import { ToastService } from '../../core/services/toast.service';
 import { Car, LeadType } from '../../core/models';
 import { BRAND, BRAND_FULL, whatsappLink } from '../../core/brand';
 import { CarCardComponent } from '../../shared/car-card.component';
+import { Car360Component } from '../../shared/car-360.component';
 import { PublicNavComponent } from '../../layout/public-nav.component';
 import { PublicFooterComponent } from '../../layout/public-footer.component';
 import {
   carGallery, carTitle, formatMileage, formatNumber, formatPrice, humanize,
-  monthlyAmortisation, onImgError,
+  monthlyAmortisation, onImgError, spinFrames,
 } from '../../core/utils/format';
 
 @Component({
@@ -20,7 +21,7 @@ import {
   standalone: true,
   imports: [
     FormsModule, ReactiveFormsModule, RouterLink,
-    CarCardComponent, PublicNavComponent, PublicFooterComponent,
+    CarCardComponent, Car360Component, PublicNavComponent, PublicFooterComponent,
   ],
   templateUrl: './vehicle.component.html',
   styleUrl: './vehicle.component.css',
@@ -58,6 +59,13 @@ export class VehicleComponent implements OnInit {
   readonly termOptions: readonly number[] = BRAND.financing.termOptions;
 
   readonly gallery = computed(() => carGallery(this.car()));
+
+  /** 360 turntable frames, empty when this vehicle has none. */
+  readonly spin = computed(() => spinFrames(this.car()));
+  readonly hasSpin = computed(() => this.spin().length > 1);
+
+  /** Which media view is showing. Defaults to 360 when one exists. */
+  readonly mediaTab = signal<'spin' | 'photos'>('photos');
 
   readonly loan = computed(() => {
     const price = Number(this.car()?.price ?? 0);
@@ -102,6 +110,7 @@ export class VehicleComponent implements OnInit {
     this.publicSvc.getCar(id).subscribe({
       next: (car) => {
         this.car.set(car);
+        this.mediaTab.set((car.spinFrames ?? 0) > 1 ? 'spin' : 'photos');
         this.loading.set(false);
 
         const title = carTitle(car);

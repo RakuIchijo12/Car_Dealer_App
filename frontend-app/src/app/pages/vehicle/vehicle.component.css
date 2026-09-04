@@ -391,3 +391,44 @@
   -webkit-backdrop-filter: blur(8px);
 }
 .gal-flags .badge-featured { background: var(--grad); }
+
+/* ═══════════════ MEDIA TABS ═══════════════ */
+.media-tabs {
+  display: inline-flex;
+  gap: 3px;
+  padding: 3px;
+  margin-bottom: 0.75rem;
+  border-radius: 99px;
+  border: 1px solid var(--hairline);
+  background: var(--raise-1);
+}
+.mtab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 1rem;
+  border: none;
+  border-radius: 99px;
+  background: none;
+  color: var(--text-2);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.22s, color 0.22s;
+}
+.mtab svg { width: 15px; height: 15px; }
+.mtab:hover { color: var(--text); }
+.mtab.active { background: var(--grad); color: var(--on-amber); }
+.mtab-n {
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 0.05rem 0.4rem;
+  border-radius: 99px;
+  background: var(--raise-2);
+}
+.mtab.active .mtab-n { background: rgba(0, 0, 0, 0.16); }
+
+@media (max-width: 480px) {
+  .media-tabs { width: 100%; }
+  .mtab { flex: 1; justify-content: center; padding-inline: 0.5rem; }
+}

@@ -1,8 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { unlink } from 'fs/promises';
-import { join } from 'path';
+import { unlink, rm, mkdir, rename } from 'fs/promises';
+import { join, extname } from 'path';
 import { Car, CarStatus } from './car.entity';
 import { CreateCarDto } from './dto/create-car.dto';
 import { UpdateCarDto } from './dto/update-car.dto';
@@ -20,6 +20,7 @@ export interface CarFilters {
 }
 
 const UPLOADS_DIR = join(__dirname, '..', '..', 'uploads');
+const SPIN_DIR = join(UPLOADS_DIR, 'spin');
 
 @Injectable()
 export class CarsService {
@@ -87,6 +88,7 @@ export class CarsService {
     const files = [car.photo, ...(car.images ?? [])].filter(Boolean) as string[];
     const removed = await this.carRepo.remove(car);
     await Promise.all(files.map((f) => this.deleteUpload(f)));
+    await rm(join(SPIN_DIR, String(id)), { recursive: true, force: true }).catch(() => undefined);
     return removed;
   }
 
@@ -97,6 +99,34 @@ export class CarsService {
     const saved = await this.carRepo.save(car);
     await this.deleteUpload(filename);
     return saved;
+  }
+
+  /**
+   * Replaces a vehicle's 360 turntable with an uploaded sequence.
+   * Files arrive in the order the operator selected them, which is the order
+   * they were shot walking around the car.
+   */
+  async setSpin(id: number, files: Express.Multer.File[]) {
+    const car = await this.findOne(id);
+    const dir = join(SPIN_DIR, String(id));
+
+    await rm(dir, { recursive: true, force: true }).catch(() => undefined);
+    await mkdir(dir, { recursive: true });
+
+    for (let i = 0; i < files.length; i++) {
+      const name = String(i).padStart(3, '0') + extname(files[i].originalname).toLowerCase();
+      await rename(files[i].path, join(dir, name));
+    }
+
+    car.spinFrames = files.length;
+    return this.carRepo.save(car);
+  }
+
+  async clearSpin(id: number) {
+    const car = await this.findOne(id);
+    await rm(join(SPIN_DIR, String(id)), { recursive: true, force: true }).catch(() => undefined);
+    car.spinFrames = 0;
+    return this.carRepo.save(car);
   }
 
   async setStatus(id: number, status: CarStatus) {
