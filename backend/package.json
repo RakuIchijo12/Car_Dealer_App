@@ -26,7 +26,8 @@
     "photos:carimages": "ts-node -r tsconfig-paths/register src/fetch-carimages.ts",
     "spin:render": "ts-node -r tsconfig-paths/register src/render-spin.ts",
     "photos:wiki": "ts-node -r tsconfig-paths/register src/fetch-wikimedia.ts",
-    "photos:normalise": "ts-node -r tsconfig-paths/register src/normalise-photos.ts"
+    "photos:normalise": "ts-node -r tsconfig-paths/register src/normalise-photos.ts",
+    "icons:bodytypes": "ts-node -r tsconfig-paths/register src/render-bodytype-icons.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",

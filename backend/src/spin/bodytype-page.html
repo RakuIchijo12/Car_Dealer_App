@@ -1,0 +1,437 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>html,body{margin:0;padding:0;background:transparent;overflow:hidden}canvas{display:block}</style>
+</head>
+<body>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+  }
+}
+</script>
+
+<script>
+window.addEventListener('error', (e) => { window.__loadError = String(e.message || e.error); });
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+/**
+ * Renders one 3D vehicle per body type for the storefront's "shop by shape" row.
+ *
+ * Rather than stacking boxes — which reads as a toy — each vehicle is an
+ * EXTRUSION of its true side profile: the same silhouettes the flat icons used,
+ * pushed through the Z axis with a bevel. That gives a real windscreen rake, a
+ * real tail angle and a real roofline, so the shape carries the body type while
+ * the lighting carries the depth.
+ *
+ * Profiles are authored on the 72 x 40 grid the flat icons used. The road sits
+ * at y = 34.6 there (wheel centre 29.4 + radius 5.2), so that becomes y = 0.
+ */
+
+const SIZE = 900;
+const S = 0.082;           // grid units -> metres
+const ROAD_Y = 34.6;       // grid y of the road line
+const WIDTH = 1.72;        // body width in metres
+
+let renderer, scene, camera, ready = false;
+
+/** Grid point -> world point, with the road at y = 0 and the car centred on x. */
+const gx = (x) => (x - 36) * S;
+const gy = (y) => (ROAD_Y - y) * S;
+
+/**
+ * Side profiles. `body` is the closed outer silhouette; `windows` are cut as
+ * separate glass panels; `wheels` are [gridX, gridRadius].
+ * Each entry is drawn nose-left, matching the photography.
+ */
+const SPECS = {
+  // Tall, upright, long roof and a near-vertical tailgate. Roof rails and the
+  // biggest wheels of the set separate it from the crossover.
+  suv: {
+    body: (s) => {
+      s.moveTo(gx(4), gy(26.2));
+      s.lineTo(gx(4), gy(20.0));
+      s.quadraticCurveTo(gx(4), gy(17.8), gx(6.8), gy(17.2));
+      s.lineTo(gx(16.5), gy(15.8));
+      s.lineTo(gx(22.6), gy(8.2));
+      s.quadraticCurveTo(gx(23.5), gy(7.2), gx(25.2), gy(7.2));
+      s.lineTo(gx(55.0), gy(7.2));
+      s.quadraticCurveTo(gx(56.8), gy(7.2), gx(57.8), gy(8.4));
+      s.lineTo(gx(62.8), gy(15.6));
+      s.quadraticCurveTo(gx(64.0), gy(17.2), gx(66.5), gy(17.8));
+      s.quadraticCurveTo(gx(68.0), gy(18.2), gx(68.0), gy(20.2));
+      s.lineTo(gx(68.0), gy(26.2));
+      s.closePath();
+    },
+    windows: [
+      [[24.6, 15.2], [27.4, 9.6], [28.8, 8.9], [38, 8.9], [38, 15.2]],
+      [[40.4, 8.9], [53, 8.9], [54.4, 9.6], [57.8, 15.2], [40.4, 15.2]],
+    ],
+    wheels: [[18.5, 5.6], [52.5, 5.6]],
+    rails: [25, 54, 6.6],
+  },
+
+  // Three-box: a distinct bonnet, cabin and a long flat boot deck.
+  sedan: {
+    body: (s) => {
+      s.moveTo(gx(4), gy(27.8));
+      s.lineTo(gx(4), gy(23.6));
+      s.quadraticCurveTo(gx(4), gy(21.6), gx(6.6), gy(21.0));
+      s.lineTo(gx(18.2), gy(19.8));
+      s.lineTo(gx(25.4), gy(13.4));
+      s.quadraticCurveTo(gx(26.4), gy(12.4), gx(28.0), gy(12.4));
+      s.lineTo(gx(44.0), gy(12.4));
+      s.quadraticCurveTo(gx(45.8), gy(12.4), gx(46.8), gy(13.4));
+      s.lineTo(gx(52.6), gy(19.4));
+      s.lineTo(gx(65.6), gy(20.4));
+      s.quadraticCurveTo(gx(68), gy(20.9), gx(68), gy(22.9));
+      s.lineTo(gx(68), gy(27.8));
+      s.closePath();
+    },
+    windows: [
+      [[26.9, 19.2], [29.8, 14.6], [31.0, 14.0], [38.2, 14.0], [38.2, 19.2]],
+      [[40.6, 14.0], [43.6, 14.0], [44.9, 14.6], [48.6, 19.2], [40.6, 19.2]],
+    ],
+    wheels: [[18.5, 5.1], [53, 5.1]],
+  },
+
+  // One-box: no bonnet step, the windscreen runs almost from the bumper and
+  // the roof is the longest of the set.
+  mpv: {
+    body: (s) => {
+      s.moveTo(gx(4), gy(26.8));
+      s.lineTo(gx(4), gy(21.4));
+      s.quadraticCurveTo(gx(4), gy(19.2), gx(6.4), gy(18.6));
+      s.lineTo(gx(11.8), gy(17.2));
+      s.lineTo(gx(19.4), gy(7.6));
+      s.quadraticCurveTo(gx(20.4), gy(6.6), gx(22.0), gy(6.6));
+      s.lineTo(gx(56.0), gy(6.6));
+      s.quadraticCurveTo(gx(58), gy(6.6), gx(58.8), gy(8.0));
+      s.lineTo(gx(62.6), gy(16.6));
+      s.quadraticCurveTo(gx(64.0), gy(18.2), gx(66.4), gy(18.8));
+      s.quadraticCurveTo(gx(67.6), gy(19.2), gx(67.6), gy(21.2));
+      s.lineTo(gx(67.6), gy(26.8));
+      s.closePath();
+    },
+    windows: [
+      [[20.8, 16.6], [24.2, 9.0], [25.5, 8.3], [35.6, 8.3], [35.6, 16.6]],
+      [[38.0, 8.3], [54.0, 8.3], [55.4, 9.0], [58.6, 16.6], [38.0, 16.6]],
+    ],
+    wheels: [[18.5, 5.2], [53.5, 5.2]],
+  },
+
+  // The profile carries the cab and the bed FLOOR only; the bed walls are
+  // built separately so the cargo box is genuinely open at the top.
+  pickup: {
+    body: (s) => {
+      s.moveTo(gx(4), gy(26.2));
+      s.lineTo(gx(4), gy(20.2));
+      s.quadraticCurveTo(gx(4), gy(18.1), gx(6.8), gy(17.5));
+      s.lineTo(gx(16.5), gy(16.1));
+      s.lineTo(gx(22.6), gy(8.4));
+      s.quadraticCurveTo(gx(23.5), gy(7.4), gx(25.2), gy(7.4));
+      s.lineTo(gx(39.6), gy(7.4));
+      s.quadraticCurveTo(gx(41.4), gy(7.4), gx(42.2), gy(8.6));
+      s.lineTo(gx(45.4), gy(15.2));
+      s.lineTo(gx(45.4), gy(22.2));
+      s.lineTo(gx(67.6), gy(22.2));
+      s.lineTo(gx(67.6), gy(26.2));
+      s.closePath();
+    },
+    windows: [
+      [[24.6, 15.2], [27.4, 9.8], [28.8, 9.1], [38, 9.1], [39.3, 9.8], [42.4, 15.2]],
+    ],
+    wheels: [[18.5, 5.6], [52.5, 5.6]],
+    bed: { x0: 45.4, x1: 67.6, top: 15.8, floor: 22.2, wall: 0.17 },
+  },
+
+  // Deliberately the shortest body here: stubby overhangs and a steep hatch
+  // that cuts straight from the roof to the bumper with no boot deck.
+  hatchback: {
+    body: (s) => {
+      s.moveTo(gx(9), gy(27.2));
+      s.lineTo(gx(9), gy(23.2));
+      s.quadraticCurveTo(gx(9), gy(21.2), gx(11.4), gy(20.6));
+      s.lineTo(gx(20.0), gy(19.4));
+      s.lineTo(gx(26.4), gy(12.8));
+      s.quadraticCurveTo(gx(27.4), gy(11.8), gx(29.0), gy(11.8));
+      s.lineTo(gx(42.5), gy(11.8));
+      s.quadraticCurveTo(gx(44.3), gy(11.8), gx(45.2), gy(13.0));
+      s.lineTo(gx(51.5), gy(21.4));
+      s.lineTo(gx(55.5), gy(22.4));
+      s.quadraticCurveTo(gx(58), gy(23.0), gx(58), gy(24.8));
+      s.lineTo(gx(58), gy(27.2));
+      s.closePath();
+    },
+    windows: [
+      [[27.8, 19.0], [30.8, 13.4], [32.1, 12.8], [37.4, 12.8], [37.4, 19.0]],
+      [[39.8, 12.8], [42.0, 12.8], [43.4, 13.5], [47.4, 19.0], [39.8, 19.0]],
+    ],
+    wheels: [[19.5, 5.0], [49.5, 5.0]],
+  },
+
+  // Between the hatchback and the SUV: raised, but with a raked tailgate and a
+  // lower roof than the SUV, and no roof rails.
+  crossover: {
+    body: (s) => {
+      s.moveTo(gx(5), gy(26.6));
+      s.lineTo(gx(5), gy(21.0));
+      s.quadraticCurveTo(gx(5), gy(18.9), gx(7.8), gy(18.3));
+      s.lineTo(gx(17.2), gy(17.0));
+      s.lineTo(gx(24.0), gy(10.6));
+      s.quadraticCurveTo(gx(25.0), gy(9.6), gx(26.6), gy(9.6));
+      s.lineTo(gx(46.5), gy(9.6));
+      s.quadraticCurveTo(gx(48.3), gy(9.6), gx(49.3), gy(10.8));
+      s.lineTo(gx(56.5), gy(18.2));
+      s.lineTo(gx(61.5), gy(19.4));
+      s.quadraticCurveTo(gx(64), gy(20.0), gx(64), gy(22.0));
+      s.lineTo(gx(64), gy(26.6));
+      s.closePath();
+    },
+    windows: [
+      [[26.0, 16.6], [28.8, 11.4], [30.2, 10.8], [37.5, 10.8], [37.5, 16.6]],
+      [[39.9, 10.8], [45.5, 10.8], [46.9, 11.4], [50.8, 16.6], [39.9, 16.6]],
+    ],
+    wheels: [[18.5, 5.4], [51.5, 5.4]],
+  },
+
+  // Slab-sided and by far the tallest, with the wheels pushed to the corners.
+  van: {
+    body: (s) => {
+      s.moveTo(gx(4), gy(27));
+      s.lineTo(gx(4), gy(11.6));
+      s.quadraticCurveTo(gx(4), gy(9), gx(7.4), gy(8.4));
+      s.lineTo(gx(15), gy(7.2));
+      s.lineTo(gx(56.4), gy(7.2));
+      s.quadraticCurveTo(gx(58.8), gy(7.2), gx(59.6), gy(9));
+      s.lineTo(gx(62.8), gy(17.2));
+      s.lineTo(gx(64.8), gy(19));
+      s.quadraticCurveTo(gx(66.6), gy(19.8), gx(66.6), gy(22));
+      s.lineTo(gx(66.6), gy(27));
+      s.closePath();
+    },
+    windows: [
+      [[7.6, 16.2], [7.6, 11], [9, 9.8], [15.6, 9], [15.6, 16.2]],
+      [[19, 9], [55, 9], [56.4, 9.8], [59.2, 16.2], [19, 16.2]],
+    ],
+    wheels: [[16.5, 5.2], [54.5, 5.2]],
+  },
+};
+
+function polygonShape(points) {
+  const s = new THREE.Shape();
+  s.moveTo(gx(points[0][0]), gy(points[0][1]));
+  for (let i = 1; i < points.length; i++) s.lineTo(gx(points[i][0]), gy(points[i][1]));
+  s.closePath();
+  return s;
+}
+
+function material(hex, opts = {}) {
+  return new THREE.MeshPhysicalMaterial({
+    color: new THREE.Color(hex),
+    metalness: opts.metalness ?? 0.4,
+    roughness: opts.roughness ?? 0.3,
+    clearcoat: opts.clearcoat ?? 0.85,
+    clearcoatRoughness: 0.1,
+    envMapIntensity: 1.25,
+  });
+}
+
+window.setup = async (opts) => {
+  const { type, size = SIZE } = opts;
+  const spec = SPECS[type] ?? SPECS.sedan;
+
+  renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+  renderer.setPixelRatio(1);
+  renderer.setSize(size, size);
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.08;
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  document.body.appendChild(renderer.domElement);
+
+  scene = new THREE.Scene();
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+
+  const key = new THREE.DirectionalLight(0xffffff, 2.5);
+  key.position.set(-5, 8, 6);
+  key.castShadow = true;
+  key.shadow.mapSize.set(2048, 2048);
+  Object.assign(key.shadow.camera, { near: 0.5, far: 30, left: -6, right: 6, top: 6, bottom: -6 });
+  key.shadow.bias = -0.0008;
+  scene.add(key);
+
+  const rim = new THREE.DirectionalLight(0xd8e4ff, 1.1);
+  rim.position.set(6, 4, -5);
+  scene.add(rim);
+  scene.add(new THREE.AmbientLight(0xffffff, 0.45));
+
+  // A mid graphite rather than white: it holds its edges against the light
+  // theme's near-white cards and still reads bright on the dark one, and the
+  // clearcoat gives the highlight that sells the surface as painted metal.
+  const mats = {
+    body: material('#7C8798', { metalness: 0.62, roughness: 0.2 }),
+    glass: material('#161C26', { metalness: 0.3, roughness: 0.04, clearcoat: 1 }),
+    tyre: material('#14171C', { metalness: 0.05, roughness: 0.85, clearcoat: 0.2 }),
+    hub: material('#98A1AF', { metalness: 0.95, roughness: 0.18 }),
+    arch: material('#2A303A', { metalness: 0.1, roughness: 0.95, clearcoat: 0 }),
+    trim: material('#39414E', { metalness: 0.6, roughness: 0.35 }),
+  };
+
+  const group = new THREE.Group();
+
+  // ── Body: the side profile extruded through Z with a bevel for soft edges ──
+  const shape = new THREE.Shape();
+  spec.body(shape);
+  const bevel = 0.07;
+  const body = new THREE.Mesh(
+    new THREE.ExtrudeGeometry(shape, {
+      depth: WIDTH - bevel * 2,
+      bevelEnabled: true,
+      bevelThickness: bevel,
+      bevelSize: bevel,
+      bevelSegments: 4,
+      curveSegments: 18,
+    }),
+    mats.body,
+  );
+  body.position.z = -(WIDTH - bevel * 2) / 2;
+  body.castShadow = true;
+  body.receiveShadow = true;
+  group.add(body);
+
+  // ── Glass: thin panels standing slightly proud of each flank ──
+  for (const pts of spec.windows ?? []) {
+    const win = new THREE.Mesh(
+      new THREE.ExtrudeGeometry(polygonShape(pts), {
+        depth: WIDTH + 0.03,
+        bevelEnabled: true,
+        bevelThickness: 0.012,
+        bevelSize: 0.012,
+        bevelSegments: 2,
+      }),
+      mats.glass,
+    );
+    win.position.z = -(WIDTH + 0.03) / 2;
+    group.add(win);
+  }
+
+  // -- Pickup bed: walls around an open cargo floor, so the box reads as a
+  //    box rather than a slab. The floor is already part of the profile. --
+  if (spec.bed) {
+    const { x0, x1, top, floor, wall } = spec.bed;
+    const len = gx(x1) - gx(x0);
+    const h = gy(top) - gy(floor);
+    const midX = (gx(x0) + gx(x1)) / 2;
+    const midY = (gy(top) + gy(floor)) / 2;
+
+    for (const z of [WIDTH / 2 - wall / 2, -WIDTH / 2 + wall / 2]) {
+      const side = new THREE.Mesh(new THREE.BoxGeometry(len, h, wall), mats.body);
+      side.position.set(midX, midY, z);
+      side.castShadow = true;
+      side.receiveShadow = true;
+      group.add(side);
+    }
+
+    const gate = new THREE.Mesh(new THREE.BoxGeometry(wall, h, WIDTH), mats.body);
+    gate.position.set(gx(x1) - wall / 2, midY, 0);
+    gate.castShadow = true;
+    group.add(gate);
+
+    // Darken the exposed floor so the opening has depth.
+    const bedFloor = new THREE.Mesh(
+      new THREE.BoxGeometry(len - wall, 0.02, WIDTH - wall * 2),
+      mats.trim,
+    );
+    bedFloor.position.set(midX, gy(floor) + 0.01, 0);
+    group.add(bedFloor);
+  }
+
+  // ── Roof rails ──
+  if (spec.rails) {
+    const [x0, x1, y] = spec.rails;
+    for (const z of [WIDTH * 0.34, -WIDTH * 0.34]) {
+      const rail = new THREE.Mesh(
+        new THREE.BoxGeometry(gx(x1) - gx(x0), 0.05, 0.07),
+        mats.trim,
+      );
+      rail.position.set((gx(x0) + gx(x1)) / 2, gy(y), z);
+      rail.castShadow = true;
+      group.add(rail);
+    }
+  }
+
+  // ── Wheels, protruding proud of the flanks ──
+  for (const [wx, wr] of spec.wheels) {
+    for (const z of [WIDTH / 2 - 0.06, -WIDTH / 2 + 0.06]) {
+      const r = wr * S;
+      const outward = Math.sign(z);
+
+      // A dark disc just inboard of the tyre, slightly larger, so the wheel
+      // sits in a socket instead of clipping through a flat slab.
+      const arch = new THREE.Mesh(
+        new THREE.CylinderGeometry(r * 1.14, r * 1.14, 0.02, 36),
+        mats.arch,
+      );
+      arch.rotation.x = Math.PI / 2;
+      arch.position.set(gx(wx), r, z - outward * 0.075);
+      group.add(arch);
+
+      const tyre = new THREE.Mesh(new THREE.CylinderGeometry(r, r, 0.3, 36), mats.tyre);
+      tyre.rotation.x = Math.PI / 2;
+      tyre.position.set(gx(wx), r, z);
+      tyre.castShadow = true;
+      group.add(tyre);
+
+      // The hub must stand clearly proud of the tyre face. Matching lengths
+      // leaves the two faces coplanar, which z-fights into a dark starburst
+      // once the icon is scaled down.
+      const hub = new THREE.Mesh(
+        new THREE.CylinderGeometry(r * 0.52, r * 0.52, 0.34, 28),
+        mats.hub,
+      );
+      hub.rotation.x = Math.PI / 2;
+      hub.position.set(gx(wx), r, z + outward * 0.02);
+      group.add(hub);
+    }
+  }
+
+  scene.add(group);
+
+  const ground = new THREE.Mesh(
+    new THREE.PlaneGeometry(40, 40),
+    new THREE.ShadowMaterial({ opacity: 0.26 }),
+  );
+  ground.rotation.x = -Math.PI / 2;
+  ground.receiveShadow = true;
+  scene.add(ground);
+
+  // Fixed three-quarter camera on the front-left corner, identical for every
+  // type so the row reads as one set. Nose is at -x.
+  // Long lens from far back: keeps the flat, product-shot look and stops the
+  // longest bodies (van, pickup) running off the edge of the canvas.
+  camera = new THREE.PerspectiveCamera(24, 1, 0.1, 200);
+  camera.position.set(-9.0, 5.0, 11.0);
+  camera.lookAt(-0.1, 0.75, 0);
+
+  renderer.render(scene, camera);
+  ready = true;
+  return true;
+};
+
+window.draw = () => {
+  if (!ready) return false;
+  renderer.render(scene, camera);
+  return true;
+};
+</script>
+</body>
+</html>

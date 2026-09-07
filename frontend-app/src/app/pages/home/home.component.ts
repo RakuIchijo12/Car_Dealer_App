@@ -49,6 +49,7 @@ export class HomeComponent implements OnInit {
     { value: 'pickup', label: 'Pickup' },
     { value: 'hatchback', label: 'Hatchback' },
     { value: 'crossover', label: 'Crossover' },
+    { value: 'van', label: 'Van' },
   ];
 
   readonly promises = [

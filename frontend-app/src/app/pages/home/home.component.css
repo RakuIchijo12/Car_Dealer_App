@@ -204,14 +204,34 @@
 }
 .bt-card:hover .bt-glow { opacity: 1; }
 
+/* Pre-rendered 3D art. The source is transparent PNG-alpha WebP shot on one
+   shared canvas, so every body type sits on the same road line and the row
+   lines up without any per-type nudging. */
 .bt-art {
   display: block;
-  color: var(--text);
-  opacity: 0.72;
-  transition: color 0.3s, opacity 0.3s, transform 0.4s var(--ease);
+  opacity: 0.88;
+  transition: opacity 0.3s, transform 0.4s var(--ease), filter 0.3s;
+  filter: drop-shadow(0 6px 10px rgb(0 0 0 / 0.28));
 }
-.bt-art svg { width: 104px; height: 58px; display: block; overflow: visible; }
-.bt-card:hover .bt-art { color: var(--amber); opacity: 1; transform: translateX(4px); }
+.bt-art img {
+  display: block;
+  width: 112px;
+  height: auto;
+}
+.bt-card:hover .bt-art {
+  opacity: 1;
+  transform: translateX(4px) scale(1.05);
+  filter: drop-shadow(0 10px 16px rgb(0 0 0 / 0.36));
+}
+
+/* The renders carry their own lighting, so on the light theme they only need
+   a softer contact shadow rather than a recolour. */
+:root[data-theme='light'] .bt-art { filter: drop-shadow(0 6px 10px rgb(15 23 42 / 0.16)); }
+:root[data-theme='light'] .bt-card:hover .bt-art { filter: drop-shadow(0 10px 16px rgb(15 23 42 / 0.24)); }
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme='dark']) .bt-art { filter: drop-shadow(0 6px 10px rgb(15 23 42 / 0.16)); }
+  :root:not([data-theme='dark']) .bt-card:hover .bt-art { filter: drop-shadow(0 10px 16px rgb(15 23 42 / 0.24)); }
+}
 
 .bt-text { display: flex; flex-direction: column; gap: 0.15rem; }
 .bt-label {
