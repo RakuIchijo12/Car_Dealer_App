@@ -72,3 +72,8 @@ typings/
 
 # Generated portfolio captures - regenerate rather than version them.
 portfolio-shots/
+
+# Added by `vercel link`; keep .env.example tracked.
+.env*
+!.env.example
+!**/.env.example
