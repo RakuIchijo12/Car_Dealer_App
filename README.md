@@ -299,9 +299,13 @@ loads the result.
 Set these in the Vercel project (not in a committed file):
 
     NODE_ENV=production
+    DATABASE_URL               # the single URL Neon/Supabase/Railway give you
+    JWT_SECRET                 # a fresh 48-byte random value, not the dev one
+
+Or, instead of `DATABASE_URL`, the discrete fields:
+
     POSTGRES_HOST, POSTGRES_PORT, POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB
     PGSSLMODE=require          # any managed Postgres
-    JWT_SECRET                 # a fresh 48-byte random value, not the dev one
 
 Set `DB_SYNC=true` for the single deploy that creates the schema, then remove
 it. Schema auto-sync is off in production by default; leaving it on lets every

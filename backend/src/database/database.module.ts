@@ -13,17 +13,34 @@ import { Lead } from '../leads/lead.entity';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (config: ConfigService) => {
-        const host = config.get<string>('POSTGRES_HOST') ?? 'localhost';
-        const needsSsl = host.includes('neon.tech') || config.get('PGSSLMODE') === 'require';
         const isProd = config.get('NODE_ENV') === 'production';
+
+        // Managed Postgres (Neon, Supabase, Railway) hands out a single URL
+        // rather than discrete fields, so accept either. The URL wins when set.
+        const url =
+          config.get<string>('DATABASE_URL') ?? config.get<string>('POSTGRES_URL');
+
+        const host = url
+          ? new URL(url).hostname
+          : (config.get<string>('POSTGRES_HOST') ?? 'localhost');
+        const needsSsl =
+          host.includes('neon.tech') ||
+          config.get('PGSSLMODE') === 'require' ||
+          (url?.includes('sslmode=require') ?? false);
+
+        const connection = url
+          ? { url }
+          : {
+              host,
+              port: +(config.get<number>('POSTGRES_PORT') ?? 5432),
+              username: config.get<string>('POSTGRES_USER'),
+              password: config.get<string>('POSTGRES_PASSWORD'),
+              database: config.get<string>('POSTGRES_DB'),
+            };
 
         return {
           type: 'postgres' as const,
-          host,
-          port: +(config.get<number>('POSTGRES_PORT') ?? 5432),
-          username: config.get<string>('POSTGRES_USER'),
-          password: config.get<string>('POSTGRES_PASSWORD'),
-          database: config.get<string>('POSTGRES_DB'),
+          ...connection,
           entities: [User, Car, Make, Customer, Lead],
           // Schema auto-migration is a local convenience only. Letting it run in
           // production means every cold start can ALTER live tables, so it is
