@@ -12,11 +12,20 @@ import { UpdateCarDto } from './dto/update-car.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CarStatus } from './car.entity';
 
-const UPLOAD_DEST = './uploads';
+// Multer resolves its destination at module load, so this has to exist before
+// the controller is constructed. A serverless filesystem is read-only apart
+// from /tmp, and failing to create it must not take the whole API down with it
+// — uploads just do not persist there. See the deployment notes in the README.
+const UPLOAD_DEST =
+  process.env.UPLOAD_DIR ?? (process.env.VERCEL ? '/tmp/uploads' : './uploads');
 const ALLOWED_MIME = ['image/jpeg', 'image/png', 'image/webp', 'image/avif'];
 const MAX_FILE_SIZE = 8 * 1024 * 1024; // 8 MB
 
-if (!existsSync(UPLOAD_DEST)) mkdirSync(UPLOAD_DEST, { recursive: true });
+try {
+  if (!existsSync(UPLOAD_DEST)) mkdirSync(UPLOAD_DEST, { recursive: true });
+} catch {
+  /* read-only filesystem — uploads are unavailable, the rest of the API is not */
+}
 
 const uploadOptions = {
   storage: diskStorage({

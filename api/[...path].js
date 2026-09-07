@@ -14,6 +14,10 @@
 const { createHandler } = require('../backend/dist/serverless');
 
 module.exports = async function handler(req, res) {
+  // Vercel's catch-all only matched a single path segment on its own, so a
+  // rewrite carries the deeper ones. Log what actually arrives: Nest routes on
+  // req.url, and a rewrite that rewrote it would 404 every nested route.
+  if (process.env.API_TRACE === '1') console.log('[api]', req.method, req.url);
   try {
     const app = await createHandler();
     app(req, res);
