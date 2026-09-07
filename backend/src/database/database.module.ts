@@ -15,6 +15,8 @@ import { Lead } from '../leads/lead.entity';
       useFactory: (config: ConfigService) => {
         const host = config.get<string>('POSTGRES_HOST') ?? 'localhost';
         const needsSsl = host.includes('neon.tech') || config.get('PGSSLMODE') === 'require';
+        const isProd = config.get('NODE_ENV') === 'production';
+
         return {
           type: 'postgres' as const,
           host,
@@ -23,8 +25,14 @@ import { Lead } from '../leads/lead.entity';
           password: config.get<string>('POSTGRES_PASSWORD'),
           database: config.get<string>('POSTGRES_DB'),
           entities: [User, Car, Make, Customer, Lead],
-          synchronize: true,
+          // Schema auto-migration is a local convenience only. Letting it run in
+          // production means every cold start can ALTER live tables, so it is
+          // opt-in there via DB_SYNC=true for the one-off initial deploy.
+          synchronize: isProd ? config.get('DB_SYNC') === 'true' : true,
           ssl: needsSsl ? { rejectUnauthorized: false } : false,
+          // Each serverless instance gets its own pool, so keep them small —
+          // Postgres connection limits are per-cluster, not per-instance.
+          ...(isProd ? { poolSize: 3, extra: { max: 3, idleTimeoutMillis: 10_000 } } : {}),
         };
       },
     }),

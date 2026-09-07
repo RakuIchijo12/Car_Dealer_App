@@ -40,6 +40,10 @@ libpeerconnection.log
 
 # ── Uploaded vehicle photos (use object storage in production) ────────────────
 uploads/
+# ...except the seeded vehicle photography, which the CDN serves in production.
+# backend/uploads stays ignored: that is the local runtime write target.
+!frontend-app/public/uploads/
+!frontend-app/public/uploads/**
 
 # ── IDEs and editors ──────────────────────────────────────────────────────────
 .idea/
@@ -65,3 +69,6 @@ desktop.ini
 .vercel
 connect.lock
 typings/
+
+# Generated portfolio captures - regenerate rather than version them.
+portfolio-shots/

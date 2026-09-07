@@ -274,19 +274,54 @@ frontend-app/
 
 ---
 
-## Deployment notes
+## Deployment
 
-- **`CORS_ORIGINS`** — comma-separated list of allowed browser origins. It defaults to
-  `http://localhost:4200`; set it to your real domain in production or the browser will
-  block every API call.
-- **`synchronize: true`** is enabled in `backend/src/database/database.module.ts`. That is
-  convenient in development but will alter your production schema on boot — switch to
-  TypeORM migrations before you carry real customer data.
-- **Uploads are stored on local disk.** On an ephemeral host (Vercel, Heroku, most
-  containers) they vanish on redeploy. Move to S3, Cloudinary or a mounted volume.
-- **The public rate limiter is in-memory**, so it is per-instance. Behind more than one
-  replica, back it with Redis.
-- **Rotate the demo credentials** before launch — both the admin password and `JWT_SECRET`.
+The repository deploys to Vercel as one project: the Angular build is served as
+static files, and the whole NestJS app runs behind a single serverless function.
+
+| Piece | Where it comes from |
+| ----- | ------------------- |
+| SPA + assets | `frontend-app/dist/frontend/browser`, served by the CDN |
+| `/api/*` | `api/[...path].js` → the tsc-built `backend/dist` |
+| `/uploads/*` | `frontend-app/public/uploads`, served by the CDN |
+
+`api/[...path].js` is a catch-all by filename rather than by rewrite: routing
+through a rewrite rewrites `req.url` to the destination, and Nest matches on
+`req.url`, so `/api/public/cars` would arrive as `/api` and 404.
+
+It is plain CommonJS because Vercel compiles that directory with esbuild, which
+does not support `emitDecoratorMetadata` — and both Nest DI and TypeORM depend
+on it. The API is therefore compiled ahead of time by tsc and the function only
+loads the result.
+
+### Required environment variables
+
+Set these in the Vercel project (not in a committed file):
+
+    NODE_ENV=production
+    POSTGRES_HOST, POSTGRES_PORT, POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB
+    PGSSLMODE=require          # any managed Postgres
+    JWT_SECRET                 # a fresh 48-byte random value, not the dev one
+
+Set `DB_SYNC=true` for the single deploy that creates the schema, then remove
+it. Schema auto-sync is off in production by default; leaving it on lets every
+cold start ALTER live tables.
+
+### Known limits
+
+- **Admin image upload does not persist in production.** Multer writes to disk,
+  and a serverless filesystem is ephemeral and read-only outside `/tmp`. The
+  seeded photography is committed and served statically, so the storefront is
+  unaffected — but new uploads need object storage (Vercel Blob, S3, Cloudinary)
+  before that feature works live.
+- **The public rate limiter is in-memory**, so it is per-instance. Serverless
+  scales to many instances, which weakens it considerably — back it with Redis
+  if it needs to be real.
+- **Cold starts pay for the Nest bootstrap and a new Postgres pool.** The app is
+  cached per warm instance and the pool capped at 3; use a pooled connection
+  string (Neon's `-pooler` host) so many instances do not exhaust the cluster.
+- **Rotate the demo credentials** before launch — both the admin password and
+  `JWT_SECRET`.
 
 ---
 
