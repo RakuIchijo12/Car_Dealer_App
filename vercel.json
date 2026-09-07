@@ -11,7 +11,9 @@
       "includeFiles": "backend/dist/**"
     }
   },
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }],
+  "rewrites": [
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
+  ],
   "headers": [
     {
       "source": "/(.*)\\.(js|css|woff2|png|jpg|jpeg|svg|webp|avif)",
